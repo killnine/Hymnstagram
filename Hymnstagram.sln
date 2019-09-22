@@ -1,0 +1,33 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "src\Web\Web.csproj", "{7EC8B2EA-6381-423B-A9B0-791A257A3A19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "src\Model\Model.csproj", "{43176707-D84B-4498-99DB-969B19D695FF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E4ACD4E2-AF40-46D8-91F9-62A854FE00AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E62A3439-50DC-46AA-B05E-C0A1310591B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.Memory", "src\DataAccess.Memory\DataAccess.Memory.csproj", "{F4D0FA86-33AB-4476-88F6-2912FCBD5D54}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7EC8B2EA-6381-423B-A9B0-791A257A3A19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EC8B2EA-6381-423B-A9B0-791A257A3A19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EC8B2EA-6381-423B-A9B0-791A257A3A19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EC8B2EA-6381-423B-A9B0-791A257A3A19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43176707-D84B-4498-99DB-969B19D695FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43176707-D84B-4498-99DB-969B19D695FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43176707-D84B-4498-99DB-969B19D695FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43176707-D84B-4498-99DB-969B19D695FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4D0FA86-33AB-4476-88F6-2912FCBD5D54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4D0FA86-33AB-4476-88F6-2912FCBD5D54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4D0FA86-33AB-4476-88F6-2912FCBD5D54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4D0FA86-33AB-4476-88F6-2912FCBD5D54}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

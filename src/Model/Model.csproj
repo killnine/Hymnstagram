@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Hymnstagram.Model</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DataTransfer\" />
+    <Folder Include="Domain\" />
+    <Folder Include="DataAccess\" />
+    <Folder Include="Domain\Enums\" />
+    <Folder Include="Domain\Services\" />
+    <Folder Include="DataAccess\Daos\" />
+    <Folder Include="DataAccess\Criteria\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0-rc1.19456.10" />
+  </ItemGroup>
+</Project>
