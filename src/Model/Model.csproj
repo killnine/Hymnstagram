@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Domain\Services\**" />
+    <EmbeddedResource Remove="Domain\Services\**" />
+    <None Remove="Domain\Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Class1.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -13,7 +19,6 @@
     <Folder Include="Domain\" />
     <Folder Include="DataAccess\" />
     <Folder Include="Domain\Enums\" />
-    <Folder Include="Domain\Services\" />
     <Folder Include="DataAccess\Daos\" />
     <Folder Include="DataAccess\Criteria\" />
   </ItemGroup>
