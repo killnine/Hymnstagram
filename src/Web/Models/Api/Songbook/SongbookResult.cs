@@ -5,12 +5,12 @@ namespace Hymnstagram.Web.Models.Api
 {
     public class SongbookResult
     {
-        public Guid Id { get; private set; }
-        public string Title { get; private set; }
-        public string Publisher { get; private set; }
-        public string ISBN10 { get; private set; }
-        public string ISBN13 { get; private set; }
-        public IList<CreatorResult> Creators { get; private set; } = new List<CreatorResult>();
-        public IList<SongResult> Songs { get; private set; } = new List<SongResult>();
+        public Guid Id { get; set; }
+        public string Title { get; set; }
+        public string Publisher { get; set; }
+        public string ISBN10 { get; set; }
+        public string ISBN13 { get; set; }
+        public IList<CreatorResult> Creators { get; set; } = new List<CreatorResult>();
+        public IList<SongResult> Songs { get; set; } = new List<SongResult>();
     }
 }

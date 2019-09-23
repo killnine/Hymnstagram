@@ -149,11 +149,12 @@ namespace Hymnstagram.Model.DataAccess
             foreach(var dto in dtos)
             {
                 var songs = _songDao.GetByCriteria(new SongSearchCriteria { SongbookId = dto.Id });
-                foreach(var song in songs)
+                dto.Songs = songs;
+                foreach (var song in songs)
                 {
                     var songCreators = _creatorDao.GetByCriteria(new CreatorSearchCriteria { ParentId = song.Id, ParentType = CreatorParentType.Song });
                     song.Creators = songCreators;
-                }
+                }                
 
                 var songbookCreators = _creatorDao.GetByCriteria(new CreatorSearchCriteria { ParentId = dto.Id, ParentType = CreatorParentType.Songbook });
                 dto.Creators = songbookCreators;

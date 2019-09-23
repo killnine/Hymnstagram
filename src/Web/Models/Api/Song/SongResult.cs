@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Hymnstagram.Web.Models.Api
 {
     public class SongResult
     {
         public Guid Id { get; set; }
-        public int? SongNumber { get; private set; }
-        public string Tune { get; private set; }
-        public string Title { get; private set; }
-        public string Key { get; private set; }
-        public string TimeSignature { get; private set; }
-        public string Solfa { get; private set; }
+        public Guid SongbookId { get; set; }
+        public int? SongNumber { get; set; }
+        public string Tune { get; set; }
+        public string Title { get; set; }
+        public string Key { get; set; }
+        public string TimeSignature { get; set; }
+        public string Solfa { get; set; }
+        public IList<CreatorResult> Creators { get; set; }
     }
 }
