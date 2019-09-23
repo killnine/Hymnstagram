@@ -9,8 +9,7 @@ namespace Hymnstagram.Web.Mapping
     {
         public SongbookProfile()
         {
-            CreateMap<Songbook, SongbookResult>();
-            CreateMap<SongbookDto, Songbook>();            
+            CreateMap<Songbook, SongbookResult>();                        
         }
     }
 }

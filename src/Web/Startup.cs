@@ -26,9 +26,16 @@ namespace Hymnstogram.Web
             services.AddControllersWithViews();
             services.AddRazorPages();
 
+            services.AddSingleton<ISongDao,SongDao>();
+            services.AddSingleton<ISongbookDao, SongbookDao>();
+            services.AddSingleton<ICreatorDao, CreatorDao>();
+            services.AddSingleton<ISongbookRepository, SongbookRepository>();
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new SongbookProfile());
+                mc.AddProfile(new CreatorProfile());
+                mc.AddProfile(new SongProfile());
             });
 
             IMapper mapper = mappingConfig.CreateMapper();
