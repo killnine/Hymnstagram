@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Hymnstagram.Model.DataAccess.Criteria;
-using Model;
+using Hymnstagram.Model.DataTransfer;
 
-namespace Hymnstagram.Model.DataAccess.Daos
+namespace Hymnstagram.Model.DataAccess
 {
     public interface ISongbookDao
     {

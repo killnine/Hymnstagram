@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Hymnstagram.Model.DataAccess;
-using Hymnstagram.Model.DataAccess.Criteria;
-using Hymnstagram.Model.DataAccess.Daos;
 using Microsoft.Extensions.Logging;
-using Model;
+using Hymnstagram.Model.DataAccess.Criteria;
+using Hymnstagram.Model.Domain;
+using Hymnstagram.Model.DataTransfer;
 
-namespace DataAccess.Memory
+namespace Hymnstagram.Model.DataAccess
 {
     public class SongbookRepository : ISongbookRepository
     {
@@ -24,43 +23,141 @@ namespace DataAccess.Memory
             _creatorDao = creatorDao ?? throw new ArgumentNullException(nameof(creatorDao));
         }
 
-        //TODO: Don't return domain object. Return Model
         public Songbook GetById(Guid id)
         {
-            return Songbook.From(_songbookDao.Get(id));
+            //TODO: Profile me
+            var songbook = _songbookDao.Get(id);
+
+            Hydrate(new List<SongbookDto> { songbook });
+
+            return Songbook.From(songbook);
         }
 
-        //TODO: Don't return domain object. Return Model
         public IList<Songbook> GetSongbooks(int pageNumber = 1, int pageSize = 10)
         {
-            //TODO: Implement maximum page size check
+            //TODO: Profile me
+            var songbookDtos = _songbookDao.Get(pageNumber, pageSize).ToList();
 
-            return _songbookDao.Get(pageNumber, pageSize).Select(Songbook.From).ToList();
+            Hydrate(songbookDtos);
+
+            return songbookDtos.Select(Songbook.From).ToList();
         }
 
-        //TODO: Don't return domain object. Return Model
         public IList<Songbook> GetSongbooksByTitleWildcard(string partialTitle, int pageNumber = 1, int pageSize = 10)
         {
-            //TODO: Implement maximum page size check
-
-            return _songbookDao.GetByCriteria(new SongbookSearchCriteria { Title = partialTitle }, pageNumber, pageSize)
+            //TODO: Profile me
+            var songbookDtos = _songbookDao.GetByCriteria(new SongbookSearchCriteria { Title = partialTitle }, pageNumber, pageSize)
                              .OrderBy(sb => sb.Title)
                              .Skip(pageSize * (pageNumber - 1))
-                             .Take(pageSize)
-                             .Select(Songbook.From)
+                             .Take(pageSize)                             
                              .ToList();
+
+            Hydrate(songbookDtos);
+
+            return songbookDtos.Select(Songbook.From).ToList();
         }
         
         public void Save(Songbook songbook)
         {
-            //TODO: Implement me.
-            throw new NotImplementedException();
+            //TODO: Profile me
+            if(songbook.IsDestroyed)
+            {
+                foreach(var song in songbook.Songs)
+                {
+                    foreach(var creator in song.Creators)
+                    {
+                        _creatorDao.Delete(creator.Id);
+                    }
+
+                    _songDao.Delete(song.Id);
+                }
+
+                _songbookDao.Delete(songbook.Id);
+            }
+
+            if(songbook.IsNew)
+            {
+                songbook.Id = Guid.NewGuid();
+                _songbookDao.Insert(songbook.ToDto());
+            }
+            else
+            {
+                _songbookDao.Update(songbook.ToDto());
+            }
+
+            foreach(var creator in songbook.Creators)
+            {
+                SaveCreator(creator, songbook.Id);
+            }
+
+            foreach(var song in songbook.Songs)
+            {
+                SaveSong(song);
+            }
         }
 
-        private Songbook Hydrate(SongbookDto dto)
+        private void SaveCreator(Creator creator, Guid parentId)
         {
-            //TODO: Hydrate into complete domain objects here
-            throw new NotImplementedException();
+            if(creator.IsDestroyed)
+            {
+                _creatorDao.Delete(creator.Id);
+            }
+
+            if(creator.IsNew)
+            {
+                creator.Id = Guid.NewGuid();
+                creator.ParentId = parentId;
+                _creatorDao.Insert(creator.ToDto());
+            }
+            else
+            {
+                _creatorDao.Update(creator.ToDto());
+            }
+        }
+
+        private void SaveSong(Song song)
+        {
+            if(song.IsDestroyed)
+            {
+                foreach (var creator in song.Creators)
+                {
+                    _creatorDao.Delete(creator.Id);
+                }
+
+                _songDao.Delete(song.Id);
+            }
+
+            if (song.IsNew)
+            {
+                song.Id = Guid.NewGuid();
+                _songDao.Insert(song.ToDto());                
+            }
+            else
+            {
+                _songDao.Update(song.ToDto());
+            }
+
+            foreach (var creator in song.Creators)
+            {
+                SaveCreator(creator, song.Id);
+            }
+        }
+
+        private void Hydrate(IList<SongbookDto> dtos)
+        {
+            //NOTE: Very naive way to populate objects. Batching would be much more performant. Let's use Miniprofiler and Benchmark.net to test that theory.
+            foreach(var dto in dtos)
+            {
+                var songs = _songDao.GetByCriteria(new SongSearchCriteria { SongbookId = dto.Id });
+                foreach(var song in songs)
+                {
+                    var songCreators = _creatorDao.GetByCriteria(new CreatorSearchCriteria { ParentId = song.Id, ParentType = CreatorParentType.Song });
+                    song.Creators = songCreators;
+                }
+
+                var songbookCreators = _creatorDao.GetByCriteria(new CreatorSearchCriteria { ParentId = dto.Id, ParentType = CreatorParentType.Songbook });
+                dto.Creators = songbookCreators;
+            }      
         }
     }
 }

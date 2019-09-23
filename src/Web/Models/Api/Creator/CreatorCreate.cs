@@ -1,5 +1,4 @@
-﻿using System;
-namespace Hymnstagram.Api.Models.Creator
+﻿namespace Hymnstagram.Web.Models.Api
 {
     public class CreatorCreate
     {

@@ -38,10 +38,12 @@ This means that Creators are more complex, with their own table separate from a 
 * StructureMap 
 * Dapper
 * Swagger
+* (Miniprofiler)[https://miniprofiler.com/dotnet/ConsoleDotNet]
 * SqlServer
 * (Experimental) IdentityServer
 * (Experimental) PolicyServer
 * (Experimental) Docker
+* (Experimental) (Benchmark.net)[https://benchmarkdotnet.org]
 * (Super Experimental) Kubernetes
 
 ## Patterns and Practices ##

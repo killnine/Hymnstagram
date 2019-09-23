@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Model
+namespace Hymnstagram.Model.Domain
 {
     public enum SolfaType
     {

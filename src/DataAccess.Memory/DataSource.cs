@@ -1,49 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
-using Model;
+using System.Linq;
+using Hymnstagram.Model.DataTransfer;
+using Hymnstagram.Model.Domain;
 
 namespace DataAccess.Memory
 {
     public static class DataSource
     {
-        public static IList<Songbook> Songbooks = new List<Songbook>()
+        private static Seed _seedData = new Seed();
+
+        public static IList<CreatorDto> Creators { get { return _seedData.Creators; } }
+        public static IList<SongDto> Songs { get { return _seedData.Songs; } }
+        public static IList<SongbookDto> Songbooks { get { return _seedData.Songbooks; } }
+    }
+
+    public class Seed
+    {
+        public List<CreatorDto> Creators { get; set; } = new List<CreatorDto>();
+        public List<SongDto> Songs { get; set; } = new List<SongDto>();
+        public List<SongbookDto> Songbooks { get; set; } = new List<SongbookDto>();
+
+        public Seed()
         {
-            Songbook.From(new SongbookDto()
+            var defaultSongbook = new SongbookDto()
             {
                 Id = Guid.NewGuid(),
                 Title = "Psalms, Hymns, and Spiritual Songs",
                 ISBN10 = "1584273526",
                 ISBN13 = "9781584273523",
-                Publisher = "Sumphonia Productions LLD (2012)",
-                Creators = new List<CreatorDto>()
-                {
-                    new CreatorDto() { Id = Guid.NewGuid(), FirstName = "David", LastName = "Maravilla", CreativeTypeId = (int)CreativeType.Editor },
-                    new CreatorDto() { Id = Guid.NewGuid(), FirstName = "Matt", LastName = "Bassford", CreativeTypeId = (int)CreativeType.TechnicalEditor }
-                },
-                Songs = new List<SongDto>()
-                {
-                    new SongDto()
-                    {
-                        Id = Guid.NewGuid(),
-                        Title = "Nearer, My God, to Thee",
-                        SongNumber = 328,
-                        Key = "G",
-                        SolfaTypeId = (int)SolfaType.Mi,
-                        TimeSignature = "4/4",
-                        Tune = "Bethany",
-                        Creators = new List<CreatorDto>()
-                        {
-                            new CreatorDto()
-                            {
-                                Id = Guid.NewGuid(),
-                                FirstName = "Sarah Flower",
-                                LastName = "Adams",
-                                CreativeTypeId = (int)CreativeType.Writer
-                            }
-                        }
-                    }
-                }
-            })
-        };
+                Publisher = "Sumphonia Productions LLD (2012)"
+            };
+
+            var defaultSongbookCreators = new List<CreatorDto>()
+            {
+                new CreatorDto() { Id = Guid.NewGuid(), ParentId = defaultSongbook.Id, FirstName = "David", LastName = "Maravilla", ParentTypeId = (int)CreativeType.Editor, TypeId = (int)CreatorParentType.Songbook },
+                new CreatorDto() { Id = Guid.NewGuid(), ParentId = defaultSongbook.Id, FirstName = "Matt", LastName = "Bassford", ParentTypeId = (int)CreativeType.TechnicalEditor, TypeId = (int)CreatorParentType.Songbook }
+            };
+
+            var defaultSong = new SongDto()
+            {
+                Id = Guid.NewGuid(),
+                SongbookId = defaultSongbook.Id,
+                Title = "Nearer, My God, to Thee",
+                SongNumber = 328,
+                Key = "G",
+                SolfaTypeId = (int)SolfaType.Mi,
+                TimeSignature = "4/4",
+                Tune = "Bethany"
+            };
+
+            var defaultSongCreator = new CreatorDto() { Id = Guid.NewGuid(), ParentId = defaultSong.Id, FirstName = "Sarah Flower", LastName = "Adams", ParentTypeId = (int)CreativeType.Writer, TypeId = (int)CreatorParentType.Song };
+
+            Songbooks.Add(defaultSongbook);
+            Songs.Add(defaultSong);
+            Creators.AddRange(defaultSongbookCreators);
+            Creators.Add(defaultSongCreator);
+        }
     }
 }

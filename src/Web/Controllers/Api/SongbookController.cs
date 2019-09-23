@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Hymnstagram.Model.DataAccess;
 using System;
-using System.Linq;
-using Model;
-using Api.Models.Songbook;
+using AutoMapper;
+using Hymnstagram.Web.Models.Api;
+using Hymnstagram.Model.Domain;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -14,46 +14,44 @@ namespace Hymnstagram.Web.Controllers.Api
     {
         private const int MAX_SONGBOOK_PAGE_SIZE = 50;
         private readonly ILogger<SongbookController> _logger;
+        private readonly IMapper _mapper;
         private readonly ISongbookRepository _repository;
-
-        public SongbookController(ILogger<SongbookController> logger, ISongbookRepository repository)
+               
+        public SongbookController(ILogger<SongbookController> logger, IMapper mapper, ISongbookRepository repository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
         [HttpGet]
-        public IEnumerable<Songbook> Get([FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 20)
+        public IEnumerable<SongbookResult> Get([FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 20)
         {
             pageSize = (pageSize > MAX_SONGBOOK_PAGE_SIZE) ? MAX_SONGBOOK_PAGE_SIZE : pageSize;
-
-            return _repository.GetSongbooks(pageNumber, pageSize);
+            
+            
+            return _mapper.Map<IEnumerable<SongbookResult>>(_repository.GetSongbooks(pageNumber, pageSize));
         }
 
-        // GET api/values/5
         [HttpGet("{id}")]
-        public Songbook GetById(Guid id)
+        public SongbookResult GetById(Guid id)
         {
-            return _repository.GetById(id);
+            return _mapper.Map<SongbookResult>(_repository.GetById(id));
         }
 
-        // POST api/values
         [HttpPost]
         public void Post([FromBody]SongbookCreate songbook)
         {
             //TODO: Convert from CreateDto to real object
-
             _repository.Save(Songbook.Create()); //TODO: implement me
         }
 
-        // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]SongbookCreate songbook)
+        public void Put(int id, [FromBody]SongbookUpdate songbook)
         {
             _repository.Save(null);
         }
 
-        // DELETE api/values/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

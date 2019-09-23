@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Hymnstagram.Api.Models.Creator;
-using Hymnstagram.Api.Models.Song;
 
-namespace Api.Models.Songbook
+namespace Hymnstagram.Web.Models.Api
 {
     public class SongbookCreate
     {

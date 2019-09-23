@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
+using DataAccess.Memory;
+using DataAccess.Memory.Daos;
+using Hymnstagram.Model.DataAccess;
+using Hymnstagram.Web.Mapping;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,10 +23,16 @@ namespace Hymnstogram.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new SongbookProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,6 +48,8 @@ namespace Hymnstogram.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

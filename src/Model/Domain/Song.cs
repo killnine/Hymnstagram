@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Hymnstagram.Model.DataTransfer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Model
+namespace Hymnstagram.Model.Domain
 {
-    public class Song
+    public class Song : EntityBase
     {
-        public Guid Id { get; set; }
+        public Guid SongbookId { get; set; }
         public int? SongNumber { get; private set; }
         public string Tune { get; private set; }
         public string Title { get; private set; }
@@ -17,15 +18,17 @@ namespace Model
         
         private Song() { }
 
-        public static Song Create()
+        public static Song Create(Guid songbookId)
         {
             return new Song()
             {
-                Id = Guid.NewGuid(),
+                SongbookId = songbookId,
+                SongNumber = null,
                 Tune = string.Empty,
                 Title = string.Empty,
                 Key = string.Empty,
                 TimeSignature = string.Empty,
+                Solfa = null,
                 Creators = new List<Creator>()
             };
         }
@@ -35,7 +38,9 @@ namespace Model
             return new Song()
             {
                 Id = dto.Id,
+                SongbookId = dto.SongbookId,
                 SongNumber = dto.SongNumber,
+                Tune = dto.Tune,
                 Title = dto.Title,
                 Key = dto.Key,
                 TimeSignature = dto.TimeSignature,
@@ -49,6 +54,7 @@ namespace Model
             return new SongDto()
             {
                 Id = Id,
+                SongbookId = SongbookId,
                 SongNumber = SongNumber,
                 Tune = Tune,
                 Title = Title,

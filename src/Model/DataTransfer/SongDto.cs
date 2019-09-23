@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Model
+namespace Hymnstagram.Model.DataTransfer
 {
     public class SongDto
     {
         public Guid Id { get; set; }
+        public Guid SongbookId { get; set; }
         public int? SongNumber { get; set; }
         public string Tune { get; set; }
         public string Title { get; set; }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Model;
+using Hymnstagram.Model.Domain;
 
 namespace Hymnstagram.Model.DataAccess
 {
