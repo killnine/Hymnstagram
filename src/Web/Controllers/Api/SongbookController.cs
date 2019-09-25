@@ -6,6 +6,7 @@ using System;
 using AutoMapper;
 using Hymnstagram.Web.Models.Api;
 using Hymnstagram.Model.Domain;
+using Hymnstagram.Model.DataTransfer;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -25,39 +26,61 @@ namespace Hymnstagram.Web.Controllers.Api
         }
 
         [HttpGet]
-        public IEnumerable<SongbookResult> Get([FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 20)
+        public IActionResult Get([FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 20)
         {
+            _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}", pageNumber, pageSize);
             pageSize = (pageSize > MAX_SONGBOOK_PAGE_SIZE) ? MAX_SONGBOOK_PAGE_SIZE : pageSize;
-            
-            
-            return _mapper.Map<IEnumerable<SongbookResult>>(_repository.GetSongbooks(pageNumber, pageSize));
+
+            var results = _mapper.Map<IEnumerable<SongbookResult>>(_repository.GetSongbooks(pageNumber, pageSize));
+
+            return Ok(results);
         }
 
-        [HttpGet("{id}")]
-        public SongbookResult GetById(Guid id)
+        [HttpGet("{id}", Name = "GetSongbook")]
+        public IActionResult GetById(Guid id)
         {
-            return _mapper.Map<SongbookResult>(_repository.GetById(id));
+            _logger.LogDebug("SongbookController.GetById called on id {@id}", id);
+            var songbook = _repository.GetById(id);
+            if(songbook == null)
+            {
+                return NotFound();
+            }
+
+            var result = _mapper.Map<SongbookResult>(songbook);
+            return Ok(result);
         }
 
         [HttpPost]
-        public void Post([FromBody]SongbookCreate songbook)
+        public IActionResult Post([FromBody]SongbookCreate songbook)
         {
-            //TODO: Convert from CreateDto to real object
-            _repository.Save(Songbook.Create()); //TODO: implement me
-        }
+            _logger.LogDebug("SongbookController.Post called to create new songbook: {@songbook}", songbook);
+            var dto = _mapper.Map<SongbookDto>(songbook);
+            var newSongbook = Songbook.From(dto);
+            _repository.Save(newSongbook);
 
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]SongbookUpdate songbook)
-        {
-            _repository.Save(null);
+            return CreatedAtRoute("GetSongbook", new { id = newSongbook.Id }, newSongbook);
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(Guid id)
         {
-            //TODO: Get object, mark deleted, save
+            _logger.LogDebug("SongbookController.Delete called to remove songbook {@id}", id);
+            if (id == null || id == Guid.Empty)
+            {
+                return BadRequest();
+            };
 
-            _repository.Save(null);
+            var songbook = _repository.GetById(id);
+            if(songbook == null)
+            {
+                _logger.LogDebug("SongbookController.Delete failed to remove songbook {@id}. It was not found.", id);
+                return NotFound();
+            }
+
+            songbook.Destroy();
+            _repository.Save(songbook);
+
+            return Ok();
         }
     }
 }

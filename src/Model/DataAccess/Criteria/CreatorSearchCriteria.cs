@@ -20,7 +20,8 @@ namespace Hymnstagram.Model.DataAccess.Criteria
         {
             get
             {
-                if(ParentType == null || ParentId == null)
+                if (IsValid) { return string.Empty; }
+                if (ParentType == null || ParentId == null)
                 {
                    return "Both ParentType and ParentId must be defined in the Creator search criteria";
                 }

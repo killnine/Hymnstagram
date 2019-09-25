@@ -13,8 +13,8 @@
         {
             get
             {
-                if(string.IsNullOrEmpty(Title)) { return "Title must be populated in Songbook search criteria"; }
-                return string.Empty;
+                if (IsValid) { return string.Empty; }
+                return "Title must be populated in Songbook search criteria";                
             }
         }
     }
