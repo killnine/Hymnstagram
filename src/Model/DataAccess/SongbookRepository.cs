@@ -28,9 +28,14 @@ namespace Hymnstagram.Model.DataAccess
             //TODO: Profile me
             var songbook = _songbookDao.Get(id);
 
-            Hydrate(new List<SongbookDto> { songbook });
+            if (songbook != null)
+            {
+                Hydrate(new List<SongbookDto> { songbook });
 
-            return Songbook.From(songbook);
+                return Songbook.From(songbook);
+            }
+
+            return null;
         }
 
         public IList<Songbook> GetSongbooks(int pageNumber = 1, int pageSize = 10)

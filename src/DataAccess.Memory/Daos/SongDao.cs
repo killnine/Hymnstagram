@@ -41,8 +41,7 @@ namespace DataAccess.Memory.Daos
             }
 
             _logger.LogInformation("Getting 'Song' records with criteria {@criteria}", criteria);
-            return DataSource.Songs.Where(sb => sb.SongbookId == criteria.SongbookId || (criteria?.SongbookIds.Any(ids => ids == sb.SongbookId) ?? false))
-                                       .ToList();
+            return DataSource.Songs.Where(sb => sb.SongbookId == criteria.SongbookId || (criteria?.SongbookIds?.Any(ids => ids == sb.SongbookId) ?? false))?.ToList() ?? new List<SongDto>();
         }
 
         public IList<SongDto> GetByCriteria(SongSearchCriteria criteria, int pageNumber, int pageSize)
