@@ -38,6 +38,15 @@ namespace Hymnstagram.Model.DataAccess
             return null;
         }
 
+        public IList<Songbook> GetSongbookByCriteria(SongbookSearchCriteria criteria, int pageNumber = 1, int pageSize = 10)
+        {
+            var songbookDtos = _songbookDao.GetByCriteria(criteria, pageNumber, pageSize);
+
+            Hydrate(songbookDtos);
+
+            return songbookDtos.Select(Songbook.From).ToList();
+        }
+
         public IList<Songbook> GetSongbooks(int pageNumber = 1, int pageSize = 10)
         {
             //TODO: Profile me
@@ -97,7 +106,7 @@ namespace Hymnstagram.Model.DataAccess
 
             foreach(var song in songbook.Songs)
             {
-                SaveSong(song);
+                SaveSong(song, songbook.Id);
             }
         }
 
@@ -120,7 +129,7 @@ namespace Hymnstagram.Model.DataAccess
             }
         }
 
-        private void SaveSong(Song song)
+        private void SaveSong(Song song, Guid parentId)
         {
             if(song.IsDestroyed)
             {
@@ -135,6 +144,7 @@ namespace Hymnstagram.Model.DataAccess
             if (song.IsNew)
             {
                 song.Id = Guid.NewGuid();
+                song.SongbookId = parentId;
                 _songDao.Insert(song.ToDto());                
             }
             else
@@ -164,6 +174,6 @@ namespace Hymnstagram.Model.DataAccess
                 var songbookCreators = _creatorDao.GetByCriteria(new CreatorSearchCriteria { ParentId = dto.Id, ParentType = CreatorParentType.Songbook });
                 dto.Creators = songbookCreators;
             }      
-        }
+        }        
     }
 }

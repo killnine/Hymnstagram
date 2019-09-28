@@ -66,7 +66,7 @@ namespace DataAccess.Memory.Daos
             }
 
             _logger.LogInformation("Getting 'Songbook' records with criteria {@criteria} (pageNumber: {@pageNumber}, pageSize: {@pageSize})", criteria, pageNumber, pageSize);
-            return DataSource.Songbooks.Where(sb => sb.Title.Contains(criteria.Title))
+            return DataSource.Songbooks.Where(sb => (criteria.Title != null && sb.Title.Contains(criteria.Title)) || (criteria?.Ids.Any(id => id == sb.Id) ?? false))
                                        .Skip(pageSize * (pageNumber - 1))
                                        .Take(pageSize)
                                        .ToList();

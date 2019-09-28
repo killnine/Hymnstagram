@@ -10,7 +10,7 @@ using Hymnstagram.Model.DataTransfer;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/songbooks")]
     public class SongbookController : Controller
     {
         private const int MAX_SONGBOOK_PAGE_SIZE = 50;
@@ -53,9 +53,17 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpPost]
         public IActionResult Post([FromBody]SongbookCreate songbook)
         {
+            if(songbook == null)
+            {
+                return BadRequest();
+            }
+
             _logger.LogDebug("SongbookController.Post called to create new songbook: {@songbook}", songbook);
             var dto = _mapper.Map<SongbookDto>(songbook);
             var newSongbook = Songbook.From(dto);
+
+            //TODO: Add validation
+
             _repository.Save(newSongbook);
 
             return CreatedAtRoute("GetSongbook", new { id = newSongbook.Id }, newSongbook);
@@ -64,16 +72,16 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpDelete("{id}")]
         public IActionResult Delete(Guid id)
         {
-            _logger.LogDebug("SongbookController.Delete called to remove songbook {@id}", id);
             if (id == null || id == Guid.Empty)
             {
                 return BadRequest();
             };
 
+            _logger.LogDebug("SongbookController.Delete called to remove songbook {@id}", id);
             var songbook = _repository.GetById(id);
             if(songbook == null)
             {
-                _logger.LogDebug("SongbookController.Delete failed to remove songbook {@id}. It was not found.", id);
+                _logger.LogWarning("SongbookController.Delete failed to remove songbook {@id}. It was not found.", id);
                 return NotFound();
             }
 

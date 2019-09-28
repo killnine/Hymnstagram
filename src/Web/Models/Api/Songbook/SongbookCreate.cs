@@ -10,7 +10,7 @@ namespace Hymnstagram.Web.Models.Api
         public DateTime PublicationDate { get; set; }
         public string ISBN10 { get; set; }
         public string ISBN13 { get; set; }
-        public IList<CreatorCreate> Creators { get; set; }
-        public IList<SongCreate> Songs { get; set; }        
+        public IList<CreatorCreate> Creators { get; set; } = new List<CreatorCreate>();
+        public IList<SongCreate> Songs { get; set; } = new List<SongCreate>();
     }
 }

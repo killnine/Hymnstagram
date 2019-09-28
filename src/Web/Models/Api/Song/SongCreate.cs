@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Hymnstagram.Web.Models.Api
 {
@@ -10,6 +11,6 @@ namespace Hymnstagram.Web.Models.Api
         public string Key { get; set; }
         public string TimeSignature { get; set; }
         public int? SolfaTypeId { get; set; }
-        public IList<CreatorCreate> Creators { get; set; }
+        public IList<CreatorCreate> Creators { get; set; } = new List<CreatorCreate>();
     }
 }
