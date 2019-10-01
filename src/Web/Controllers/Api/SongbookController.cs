@@ -7,31 +7,53 @@ using AutoMapper;
 using Hymnstagram.Web.Models.Api;
 using Hymnstagram.Model.Domain;
 using Hymnstagram.Model.DataTransfer;
+using Hymnstagram.Web.Helpers.Parameters;
+using Hymnstagram.Model.DataAccess.Criteria;
+using Hymnstagram.Web.Helpers;
+using System.Text.Json;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
     [Route("api/songbooks")]
     public class SongbookController : Controller
     {
-        private const int MAX_SONGBOOK_PAGE_SIZE = 50;
+        
         private readonly ILogger<SongbookController> _logger;
         private readonly IMapper _mapper;
         private readonly ISongbookRepository _repository;
-               
-        public SongbookController(ILogger<SongbookController> logger, IMapper mapper, ISongbookRepository repository)
+        private readonly IUrlHelper _urlHelper;
+
+        public SongbookController(ILogger<SongbookController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _urlHelper = urlHelper ?? throw new ArgumentNullException(nameof(urlHelper));
         }
 
         [HttpGet]
-        public IActionResult Get([FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 20)
+        public IActionResult Get(SongbookResourceParameters parameters)
         {
-            _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}", pageNumber, pageSize);
-            pageSize = (pageSize > MAX_SONGBOOK_PAGE_SIZE) ? MAX_SONGBOOK_PAGE_SIZE : pageSize;
+            _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}");            
 
-            var results = _mapper.Map<IEnumerable<SongbookResult>>(_repository.GetSongbooks(pageNumber, pageSize));
+            var songbooks = _repository.GetSongbookByCriteria(_mapper.Map<SongbookSearchCriteria>(parameters));
+
+            var previousPageLink = songbooks.HasPrevious ? CreateSongbookResourceUri(parameters, ResourceUriType.PreviousPage) : null;
+            var nextPageLink = songbooks.HasNext ? CreateSongbookResourceUri(parameters, ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = songbooks.TotalCount,
+                pageSize = songbooks.PageSize,
+                currentPage = songbooks.CurrentPage,
+                totalPages = songbooks.TotalPages,
+                previousPageLink = previousPageLink,
+                nextPageLink = nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            var results = _mapper.Map<IEnumerable<Songbook>>(songbooks);
 
             return Ok(results);
         }
@@ -89,6 +111,32 @@ namespace Hymnstagram.Web.Controllers.Api
             _repository.Save(songbook);
 
             return Ok();
+        }
+
+
+        private string CreateSongbookResourceUri(SongbookResourceParameters parameters, ResourceUriType type)
+        {
+            switch(type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetSongbooks", new
+                    {
+                        pageNumber = parameters.PageNumber - 1,
+                        pageSize = parameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetSongbooks", new
+                    {
+                        pageNumber = parameters.PageNumber + 1,
+                        pageSize = parameters.PageSize
+                    });
+                default:
+                    return _urlHelper.Link("GetAuthors", new
+                    {
+                        pageNumber = parameters.PageNumber,
+                        pageSize = parameters.PageSize
+                    });
+            }
         }
     }
 }

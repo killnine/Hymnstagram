@@ -19,12 +19,14 @@ namespace Hymnstagram.Web.Controllers.Api
         private readonly ILogger<SongbookCollectionController> _logger;
         private readonly IMapper _mapper;
         private readonly ISongbookRepository _repository;
+        private readonly IUrlHelper _urlHelper;
 
-        public SongbookCollectionController(ILogger<SongbookCollectionController> logger, IMapper mapper, ISongbookRepository repository)
+        public SongbookCollectionController(ILogger<SongbookCollectionController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper)
         {
             _logger = logger;
             _mapper = mapper;
             _repository = repository;
+            _urlHelper = urlHelper;
         }
 
         [HttpGet("({ids})", Name = "GetSongbookCollection")]
@@ -36,7 +38,7 @@ namespace Hymnstagram.Web.Controllers.Api
             }
 
             _logger.LogDebug("SongbookCollectionController.Get called for ids {@ids}.", ids);
-            var songbooks = _repository.GetSongbookByCriteria(new SongbookSearchCriteria() { Ids = ids.ToList() }, 1, ids.Count());
+            var songbooks = _repository.GetSongbookByCriteria(new SongbookSearchCriteria() { Ids = ids.ToList(), PageNumber = 1, PageSize = ids.Count() });
 
             if(ids.Count() != songbooks.Count())
             {

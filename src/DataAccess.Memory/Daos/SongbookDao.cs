@@ -57,19 +57,18 @@ namespace DataAccess.Memory.Daos
             return DataSource.Songbooks.Skip(pageSize * (pageNumber - 1)).Take(pageSize).ToList();
         }
 
-        public IList<SongbookDto> GetByCriteria(SongbookSearchCriteria criteria, int pageNumber, int pageSize)
+        public IList<SongbookDto> GetByCriteria(SongbookSearchCriteria criteria)
         {
-            if(!criteria.IsValid) 
-            {
-                _logger.LogWarning("Unable to retrieve 'Songbook' records by criteria. It is invalid. ({@criteria})", criteria);
-                throw new InvalidSearchCriteriaException(criteria); 
-            }
-
-            _logger.LogInformation("Getting 'Songbook' records with criteria {@criteria} (pageNumber: {@pageNumber}, pageSize: {@pageSize})", criteria, pageNumber, pageSize);
-            return DataSource.Songbooks.Where(sb => (criteria.Title != null && sb.Title.Contains(criteria.Title)) || (criteria?.Ids.Any(id => id == sb.Id) ?? false))
-                                       .Skip(pageSize * (pageNumber - 1))
-                                       .Take(pageSize)
-                                       .ToList();
+            _logger.LogInformation("Getting 'Songbook' records with criteria {@criteria} (pageNumber: {@pageNumber}, pageSize: {@pageSize})", criteria, criteria.PageNumber, criteria.PageSize);
+            return DataSource.Songbooks.Where(sb => (criteria.Title != null && sb.Title.Contains(criteria.Title)) ||
+                                                    (criteria.Publisher != null && sb.Publisher.Contains(criteria.Publisher)) ||
+                                                    (criteria.ISBN10 != null && sb.ISBN10.Contains(criteria.ISBN10)) ||
+                                                    (criteria.ISBN13 != null && sb.ISBN13.Contains(criteria.ISBN13)) ||                                                
+                                                    (criteria?.Ids.Any(id => id == sb.Id) ?? false) ||
+                                                    (criteria.Title == null && criteria.Publisher == null && criteria.ISBN10 == null && criteria.ISBN13 == null && !criteria.Ids.Any()))
+                                       .Skip(criteria.PageSize * (criteria.PageNumber - 1))
+                                       .Take(criteria.PageSize)
+                                       .ToList();            
         }
 
         public void Insert(SongbookDto dto)

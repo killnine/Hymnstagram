@@ -5,22 +5,25 @@ using Microsoft.Extensions.Logging;
 using Hymnstagram.Model.DataAccess.Criteria;
 using Hymnstagram.Model.Domain;
 using Hymnstagram.Model.DataTransfer;
+using Hymnstagram.Web.Services;
 
 namespace Hymnstagram.Model.DataAccess
 {
     public class SongbookRepository : ISongbookRepository
     {
-        private ILogger<SongbookRepository> _logger;
-        private ISongbookDao _songbookDao;
-        private ISongDao _songDao;
-        private ICreatorDao _creatorDao;
+        private readonly ILogger<SongbookRepository> _logger;
+        private readonly ISongbookDao _songbookDao;
+        private readonly ISongDao _songDao;
+        private readonly ICreatorDao _creatorDao;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public SongbookRepository(ILogger<SongbookRepository> logger, ISongbookDao songbookDao, ISongDao songDao, ICreatorDao creatorDao)
+        public SongbookRepository(ILogger<SongbookRepository> logger, ISongbookDao songbookDao, ISongDao songDao, ICreatorDao creatorDao, IPropertyMappingService propertyMappingService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _songbookDao = songbookDao ?? throw new ArgumentNullException(nameof(songbookDao));
             _songDao = songDao ?? throw new ArgumentNullException(nameof(songDao));
             _creatorDao = creatorDao ?? throw new ArgumentNullException(nameof(creatorDao));
+            _propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         public Songbook GetById(Guid id)
@@ -38,37 +41,15 @@ namespace Hymnstagram.Model.DataAccess
             return null;
         }
 
-        public IList<Songbook> GetSongbookByCriteria(SongbookSearchCriteria criteria, int pageNumber = 1, int pageSize = 10)
+        public PagedList<Songbook> GetSongbookByCriteria(SongbookSearchCriteria criteria)
         {
-            var songbookDtos = _songbookDao.GetByCriteria(criteria, pageNumber, pageSize);
+            var songbookDtos = _songbookDao.GetByCriteria(criteria);
 
             Hydrate(songbookDtos);
 
-            return songbookDtos.Select(Songbook.From).ToList();
-        }
+            var songbooks = songbookDtos.Select(Songbook.From);
 
-        public IList<Songbook> GetSongbooks(int pageNumber = 1, int pageSize = 10)
-        {
-            //TODO: Profile me
-            var songbookDtos = _songbookDao.Get(pageNumber, pageSize).ToList();
-
-            Hydrate(songbookDtos);
-
-            return songbookDtos.Select(Songbook.From).ToList();
-        }
-
-        public IList<Songbook> GetSongbooksByTitleWildcard(string partialTitle, int pageNumber = 1, int pageSize = 10)
-        {
-            //TODO: Profile me
-            var songbookDtos = _songbookDao.GetByCriteria(new SongbookSearchCriteria { Title = partialTitle }, pageNumber, pageSize)
-                             .OrderBy(sb => sb.Title)
-                             .Skip(pageSize * (pageNumber - 1))
-                             .Take(pageSize)                             
-                             .ToList();
-
-            Hydrate(songbookDtos);
-
-            return songbookDtos.Select(Songbook.From).ToList();
+            return PagedList<Songbook>.Create(songbooks, criteria.PageNumber, criteria.PageSize);
         }
         
         public void Save(Songbook songbook)
