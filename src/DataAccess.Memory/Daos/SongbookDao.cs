@@ -20,27 +20,9 @@ namespace DataAccess.Memory.Daos
         public void Delete(Guid id)
         {
             _logger.LogInformation("Deleting 'Songbook' record with id {@id}", id);
-
             var songbookToRemove = DataSource.Songbooks.FirstOrDefault(c => c.Id == id);
             if (songbookToRemove != null)
             {
-                //Remove the dependent songs
-                var songsToRemove = DataSource.Songs.Where(s => s.SongbookId == id);
-                if (songsToRemove.Any())
-                {
-                    foreach (var song in songsToRemove)
-                    {
-                        //Remove the dependent creators
-                        var creatorsToRemove = DataSource.Creators.Where(c => c.ParentId == song.Id);
-                        foreach (var creator in creatorsToRemove)
-                        {
-                            DataSource.Creators.Remove(creator);
-                        }
-
-                        DataSource.Songs.Remove(song);
-                    }
-                }
-
                 DataSource.Songbooks.Remove(songbookToRemove);
             }
         }

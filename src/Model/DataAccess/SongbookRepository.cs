@@ -6,6 +6,7 @@ using Hymnstagram.Model.DataAccess.Criteria;
 using Hymnstagram.Model.Domain;
 using Hymnstagram.Model.DataTransfer;
 using Hymnstagram.Web.Services;
+using Hymnstagram.Web.Helpers.Extensions;
 
 namespace Hymnstagram.Model.DataAccess
 {
@@ -43,7 +44,7 @@ namespace Hymnstagram.Model.DataAccess
 
         public PagedList<Songbook> GetSongbookByCriteria(SongbookSearchCriteria criteria)
         {
-            var songbookDtos = _songbookDao.GetByCriteria(criteria);
+            var songbookDtos = _songbookDao.GetByCriteria(criteria).ApplySort(criteria.OrderBy, _propertyMappingService.GetPropertyMapping<SongbookDto, Songbook>()).ToList();
 
             Hydrate(songbookDtos);
 
