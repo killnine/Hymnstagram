@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Hymnstagram.Model.DataAccess;
 using Hymnstagram.Model.DataTransfer;
@@ -9,8 +8,6 @@ using Hymnstagram.Model.Domain;
 using Hymnstagram.Web.Models.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Hymnstagram.Web.Controllers.Api
 {
