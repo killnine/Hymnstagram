@@ -42,10 +42,10 @@ namespace DataAccess.Memory.Daos
         public IList<SongbookDto> GetByCriteria(SongbookSearchCriteria criteria)
         {
             _logger.LogInformation("Getting 'Songbook' records with criteria {@criteria} (pageNumber: {@pageNumber}, pageSize: {@pageSize})", criteria, criteria.PageNumber, criteria.PageSize);
-            return DataSource.Songbooks.Where(sb => (criteria.Title != null && sb.Title.Contains(criteria.Title)) ||
-                                                    (criteria.Publisher != null && sb.Publisher.Contains(criteria.Publisher)) ||
-                                                    (criteria.ISBN10 != null && sb.ISBN10.Contains(criteria.ISBN10)) ||
-                                                    (criteria.ISBN13 != null && sb.ISBN13.Contains(criteria.ISBN13)) ||                                                
+            return DataSource.Songbooks.Where(sb => (criteria.Title != null && sb.Title.Contains(criteria.Title, StringComparison.OrdinalIgnoreCase)) ||
+                                                    (criteria.Publisher != null && sb.Publisher.Contains(criteria.Publisher, StringComparison.OrdinalIgnoreCase)) ||
+                                                    (criteria.ISBN10 != null && sb.ISBN10.Contains(criteria.ISBN10, StringComparison.OrdinalIgnoreCase)) ||
+                                                    (criteria.ISBN13 != null && sb.ISBN13.Contains(criteria.ISBN13, StringComparison.OrdinalIgnoreCase)) ||                                                
                                                     (criteria?.Ids.Any(id => id == sb.Id) ?? false) ||
                                                     (criteria.Title == null && criteria.Publisher == null && criteria.ISBN10 == null && criteria.ISBN13 == null && !criteria.Ids.Any()))
                                        .Skip(criteria.PageSize * (criteria.PageNumber - 1))

@@ -13,7 +13,7 @@ namespace Hymnstagram.Web.Helpers.Extensions
             if(source == null) 
             { 
                 throw new ArgumentNullException(nameof(source)); 
-            }
+            }            
 
             if(mappingDictionary == null) 
             { 
@@ -29,6 +29,7 @@ namespace Hymnstagram.Web.Helpers.Extensions
             var orderByAfterSplit = orderBy.Split(',');
 
             //apply each orderBy clause in reverse order
+            var sourceQueryable = source.AsQueryable<T>();
             foreach (var orderByClause in orderByAfterSplit.Reverse())
             {
                 //can't trim in foreach
@@ -55,7 +56,7 @@ namespace Hymnstagram.Web.Helpers.Extensions
                     throw new ArgumentNullException("propertyMappingValue");
                 }
 
-                //Run through property names in reverse so orderBy clause is applied correctly
+                //Run through property names in reverse so orderBy clause is applied correctly                
                 foreach (var destinationProperty in propertyMappingValue.DestinationProperties.Reverse())
                 {
                     //reverse sort order if necessary
@@ -63,10 +64,10 @@ namespace Hymnstagram.Web.Helpers.Extensions
                     {
                         orderDescending = !orderDescending;
                     }
-                    source = source.AsQueryable<T>().OrderBy(destinationProperty + (orderDescending ? " descending" : " ascending"));
+                    sourceQueryable = sourceQueryable.OrderBy(destinationProperty + (orderDescending ? " descending" : " ascending"));
                 }
             }
-            return source;
+            return sourceQueryable;
         }
     }
 }
