@@ -23,8 +23,7 @@ namespace Hymnstagram.Web.Controllers.Api
         private readonly IMapper _mapper;
         private readonly ISongbookRepository _repository;
         private readonly IUrlHelper _urlHelper;
-        private readonly IPropertyMappingService _propertyMappingService;
-        private const string VENDOR_MEDIA_TYPE = "application/vnd.hymnstagram.hateoas+json";
+        private readonly IPropertyMappingService _propertyMappingService;        
 
         public SongbookController(ILogger<SongbookController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper, IPropertyMappingService propertyMappingService)
         {
@@ -36,7 +35,7 @@ namespace Hymnstagram.Web.Controllers.Api
         }
 
         [HttpGet]
-        public IActionResult Get(SongbookResourceParameters parameters, [FromHeader(Name = "Accept")] string mediaType)
+        public IActionResult Get(SongbookResourceParameters parameters)
         {
             _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}");            
 
@@ -82,7 +81,7 @@ namespace Hymnstagram.Web.Controllers.Api
             return Ok(CreateLinksForSongbook(result));
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateSongbook")]
         public IActionResult Post([FromBody]SongbookCreate songbook)
         {
             if(songbook == null)
