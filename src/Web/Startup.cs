@@ -1,11 +1,15 @@
 using AutoMapper;
-using DataAccess.Memory;
 using DataAccess.Memory.Daos;
 using Hymnstagram.Model.DataAccess;
+using Hymnstagram.Model.Services;
 using Hymnstagram.Web.Mapping;
+using Hymnstagram.Web.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,7 +28,7 @@ namespace Hymnstogram.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews();            
             services.AddRazorPages();
 
             services.AddSingleton<ISongDao,SongDao>();
@@ -32,11 +36,22 @@ namespace Hymnstogram.Web
             services.AddSingleton<ICreatorDao, CreatorDao>();
             services.AddSingleton<ISongbookRepository, SongbookRepository>();
 
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
+            {
+
+                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;                
+                return new UrlHelper(actionContext);
+            });
+
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new SongbookProfile());
                 mc.AddProfile(new CreatorProfile());
                 mc.AddProfile(new SongProfile());
+                mc.AddProfile(new ParametersProfile());
             });
 
             IMapper mapper = mappingConfig.CreateMapper();
@@ -60,11 +75,10 @@ namespace Hymnstogram.Web
                         await context.Response.WriteAsync("An unexpected fault occurred. Try again later."); //log here
                     });
                 });
+
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-            }
-
-            
+            }            
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

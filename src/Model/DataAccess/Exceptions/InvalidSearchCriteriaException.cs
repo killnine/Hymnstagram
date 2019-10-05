@@ -7,7 +7,7 @@ namespace Hymnstagram.Model.DataAccess
     {
         private SearchCriteriaBase _criteria;
 
-        public InvalidSearchCriteriaException(SearchCriteriaBase criteria) { }
+        public InvalidSearchCriteriaException(SearchCriteriaBase criteria) { _criteria = criteria; }
 
         public override string Message => _criteria.BrokenRules;
     }

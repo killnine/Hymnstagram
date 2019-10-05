@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Hymnstagram.Model.DataTransfer;
 using Hymnstagram.Model.Domain;
 
@@ -25,7 +24,7 @@ namespace DataAccess.Memory
         {
             var defaultSongbook = new SongbookDto()
             {
-                Id = Guid.NewGuid(),
+                Id = new Guid("21924d66-dac6-43a5-beee-206de4d35216"),
                 Title = "Psalms, Hymns, and Spiritual Songs",
                 ISBN10 = "1584273526",
                 ISBN13 = "9781584273523",
@@ -34,13 +33,13 @@ namespace DataAccess.Memory
 
             var defaultSongbookCreators = new List<CreatorDto>()
             {
-                new CreatorDto() { Id = Guid.NewGuid(), ParentId = defaultSongbook.Id, FirstName = "David", LastName = "Maravilla", ParentTypeId = (int)CreativeType.Editor, TypeId = (int)CreatorParentType.Songbook },
-                new CreatorDto() { Id = Guid.NewGuid(), ParentId = defaultSongbook.Id, FirstName = "Matt", LastName = "Bassford", ParentTypeId = (int)CreativeType.TechnicalEditor, TypeId = (int)CreatorParentType.Songbook }
+                new CreatorDto() { Id = new Guid("fdfba83c-08aa-42a4-b1c1-46b8e154f297"), ParentId = defaultSongbook.Id, FirstName = "David", LastName = "Maravilla", ParentTypeId = (int)CreativeType.Editor, TypeId = (int)CreatorParentType.Songbook },
+                new CreatorDto() { Id = new Guid("e2495b99-9fd0-4be6-b2db-893ce69a6f38"), ParentId = defaultSongbook.Id, FirstName = "Matt", LastName = "Bassford", ParentTypeId = (int)CreativeType.TechnicalEditor, TypeId = (int)CreatorParentType.Songbook }
             };
 
             var defaultSong = new SongDto()
             {
-                Id = Guid.NewGuid(),
+                Id = new Guid("6767f7f5-0dc9-4b78-a0f0-e450e4b60889"),
                 SongbookId = defaultSongbook.Id,
                 Title = "Nearer, My God, to Thee",
                 SongNumber = 328,
@@ -50,7 +49,7 @@ namespace DataAccess.Memory
                 Tune = "Bethany"
             };
 
-            var defaultSongCreator = new CreatorDto() { Id = Guid.NewGuid(), ParentId = defaultSong.Id, FirstName = "Sarah Flower", LastName = "Adams", ParentTypeId = (int)CreativeType.Writer, TypeId = (int)CreatorParentType.Song };
+            var defaultSongCreator = new CreatorDto() { Id = new Guid("d3788116-90f7-40d4-9a82-a3cef6e769df"), ParentId = defaultSong.Id, FirstName = "Sarah Flower", LastName = "Adams", ParentTypeId = (int)CreativeType.Writer, TypeId = (int)CreatorParentType.Song };
 
             Songbooks.Add(defaultSongbook);
             Songs.Add(defaultSong);

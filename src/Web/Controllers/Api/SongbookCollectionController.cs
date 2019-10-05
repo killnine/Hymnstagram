@@ -1,46 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
+using Hymnstagram.Model.DataAccess;
+using Hymnstagram.Model.DataAccess.Criteria;
+using Hymnstagram.Model.DataTransfer;
+using Hymnstagram.Model.Domain;
+using Hymnstagram.Web.Helpers;
+using Hymnstagram.Web.Models.Api;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/songbookcollections")]
     public class SongbookCollectionController : Controller
     {
-        // GET: api/values
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly ILogger<SongbookCollectionController> _logger;
+        private readonly IMapper _mapper;
+        private readonly ISongbookRepository _repository;
+        private readonly IUrlHelper _urlHelper;
+
+        public SongbookCollectionController(ILogger<SongbookCollectionController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper)
         {
-            return new string[] { "value1", "value2" };
+            _logger = logger;
+            _mapper = mapper;
+            _repository = repository;
+            _urlHelper = urlHelper;
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("({ids})", Name = "GetSongbookCollection")]
+        public IActionResult GetSongbookCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
         {
-            return "value";
+            if(ids == null)
+            {
+                return BadRequest();
+            }
+
+            _logger.LogDebug("SongbookCollectionController.Get called for ids {@ids}.", ids);
+            var songbooks = _repository.GetSongbookByCriteria(new SongbookSearchCriteria() { Ids = ids.ToList(), PageNumber = 1, PageSize = ids.Count() });
+
+            if(ids.Count() != songbooks.Count())
+            {
+                return NotFound();
+            }
+
+            var songbooksToReturn = _mapper.Map<IEnumerable<SongbookResult>>(songbooks);
+            return Ok(songbooksToReturn.Select(CreateLinksForSongbook));
         }
 
-        // POST api/values
         [HttpPost]
-        public void Post([FromBody]string value)
+        public IActionResult Post([FromBody]IEnumerable<SongbookCreate> songbookCollection)
         {
+            if(songbookCollection == null)
+            {
+                return BadRequest();
+            }
+
+            _logger.LogDebug("SongbookCollectionController.Post called to add a new collection of songbooks {@songbookCollection}", songbookCollection);
+            var songbooks = _mapper.Map<IEnumerable<SongbookDto>>(songbookCollection).Select(Songbook.From).ToList();
+            foreach(var songbook in songbooks)
+            {                
+                _repository.Save(songbook);
+            }
+
+            var idsAsString = string.Join(",", songbooks.Select(sb => sb.Id));
+
+            return CreatedAtRoute("GetSongbookCollection", new { ids = idsAsString }, _mapper.Map<IEnumerable<SongbookResult>>(songbooks).Select(CreateLinksForSongbook));
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        private SongbookResult CreateLinksForSongbook(SongbookResult songbook)
         {
-        }
+            songbook.Links.Add(new Link(_urlHelper.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
+            songbook.Links.Add(new Link(_urlHelper.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return songbook;
         }
     }
 }
