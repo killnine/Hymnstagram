@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Hymnstagram.Web.Models.Api
 {
-    public class SongbookResult
+    public class SongbookResult : LinkedResourceBase
     {
         public Guid Id { get; set; }
         public string Title { get; set; }

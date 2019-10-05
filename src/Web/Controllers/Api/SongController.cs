@@ -15,15 +15,17 @@ namespace Hymnstagram.Web.Controllers.Api
     public class SongController : Controller
     {
         private const int MAX_SONG_PAGE_SIZE = 50;
-        private ILogger<SongController> _logger;
-        private ISongbookRepository _repository;
-        private IMapper _mapper;
+        private readonly ILogger<SongController> _logger;
+        private readonly ISongbookRepository _repository;
+        private readonly IMapper _mapper;
+        private readonly IUrlHelper _urlHelper;
 
-        public SongController(ILogger<SongController> logger, IMapper mapper, ISongbookRepository repository)
+        public SongController(ILogger<SongController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _urlHelper = urlHelper ?? throw new ArgumentNullException(nameof(urlHelper));
         }
         
         [HttpGet]
@@ -90,7 +92,7 @@ namespace Hymnstagram.Web.Controllers.Api
             return CreatedAtRoute("GetSong", new { songbookId = newSong.SongbookId, id = newSong.Id }, newSong);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteSong")]
         public IActionResult Delete(Guid songbookId, Guid id)
         {
             if (id == null || id == Guid.Empty)
@@ -117,6 +119,14 @@ namespace Hymnstagram.Web.Controllers.Api
             _repository.Save(songbook);
 
             return Ok();
+        }
+
+        private SongResult CreateLinksForSong(SongResult songbook)
+        {
+            songbook.Links.Add(new Link(_urlHelper.Link("GetSong", new { id = songbook.Id }), "self", "GET"));
+            songbook.Links.Add(new Link(_urlHelper.Link("DeleteSong", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+
+            return songbook;
         }
     }
 }

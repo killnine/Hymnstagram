@@ -46,7 +46,7 @@ namespace Hymnstagram.Web.Controllers.Api
             }
 
             var songbooksToReturn = _mapper.Map<IEnumerable<SongbookResult>>(songbooks);
-            return Ok(songbooksToReturn);
+            return Ok(songbooksToReturn.Select(CreateLinksForSongbook));
         }
 
         [HttpPost]
@@ -66,7 +66,15 @@ namespace Hymnstagram.Web.Controllers.Api
 
             var idsAsString = string.Join(",", songbooks.Select(sb => sb.Id));
 
-            return CreatedAtRoute("GetSongbookCollection", new { ids = idsAsString }, _mapper.Map<IEnumerable<SongbookResult>>(songbooks));
+            return CreatedAtRoute("GetSongbookCollection", new { ids = idsAsString }, _mapper.Map<IEnumerable<SongbookResult>>(songbooks).Select(CreateLinksForSongbook));
+        }
+
+        private SongbookResult CreateLinksForSongbook(SongbookResult songbook)
+        {
+            songbook.Links.Add(new Link(_urlHelper.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
+            songbook.Links.Add(new Link(_urlHelper.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+
+            return songbook;
         }
     }
 }

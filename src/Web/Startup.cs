@@ -28,7 +28,7 @@ namespace Hymnstogram.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews();            
             services.AddRazorPages();
 
             services.AddSingleton<ISongDao,SongDao>();
@@ -39,7 +39,8 @@ namespace Hymnstogram.Web
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
             {
-                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
+
+                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;                
                 return new UrlHelper(actionContext);
             });
 
@@ -74,11 +75,10 @@ namespace Hymnstogram.Web
                         await context.Response.WriteAsync("An unexpected fault occurred. Try again later."); //log here
                     });
                 });
+
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-            }
-
-            
+            }            
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
