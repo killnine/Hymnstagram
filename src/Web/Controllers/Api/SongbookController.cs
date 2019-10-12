@@ -42,19 +42,16 @@ namespace Hymnstagram.Web.Controllers.Api
                 return BadRequest();
             }
 
-            var songbooks = _repository.GetSongbookByCriteria(_mapper.Map<SongbookSearchCriteria>(parameters));
+            var songbooks = _repository.GetSongbookByCriteria(_mapper.Map<SongbookSearchCriteria>(parameters));           
             
-            var previousPageLink = songbooks.HasPrevious ? CreateSongbookResourceUri(parameters, ResourceUriType.PreviousPage) : null;
-            var nextPageLink = songbooks.HasNext ? CreateSongbookResourceUri(parameters, ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = songbooks.TotalCount,
                 pageSize = songbooks.PageSize,
                 currentPage = songbooks.CurrentPage,
                 totalPages = songbooks.TotalPages,
-                previousPageLink = previousPageLink,
-                nextPageLink = nextPageLink
+                previousPageLink = songbooks.HasPrevious ? CreateSongbookResourceUri(parameters, ResourceUriType.PreviousPage) : null,
+                nextPageLink = songbooks.HasNext ? CreateSongbookResourceUri(parameters, ResourceUriType.NextPage) : null
             };
 
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));

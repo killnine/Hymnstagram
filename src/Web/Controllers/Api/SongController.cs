@@ -17,7 +17,6 @@ namespace Hymnstagram.Web.Controllers.Api
     [Route("api/songbooks/{songbookId}/songs")]
     public class SongController : Controller
     {
-        private const int MAX_SONG_PAGE_SIZE = 50;
         private readonly ILogger<SongController> _logger;
         private readonly ISongbookRepository _repository;
         private readonly IMapper _mapper;        
@@ -40,12 +39,8 @@ namespace Hymnstagram.Web.Controllers.Api
             {
                 return NotFound();
             }
-
                                    
             var songs = PagedList<SongResult>.Create(_mapper.Map<IEnumerable<SongResult>>(songbook.Songs.Skip(parameters.PageNumber - 1).Take(parameters.PageSize)), parameters.PageNumber, parameters.PageSize);
-
-            var previousPageLink = songs.HasPrevious ? CreateSongResourceUri(parameters, ResourceUriType.PreviousPage) : null;
-            var nextPageLink = songs.HasNext ? CreateSongResourceUri(parameters, ResourceUriType.NextPage) : null;
 
             var paginationMetadata = new
             {
@@ -53,8 +48,8 @@ namespace Hymnstagram.Web.Controllers.Api
                 pageSize = songs.PageSize,
                 currentPage = songs.CurrentPage,
                 totalPages = songs.TotalPages,
-                previousPageLink = previousPageLink,
-                nextPageLink = nextPageLink
+                previousPageLink = songs.HasPrevious ? CreateSongResourceUri(parameters, ResourceUriType.PreviousPage) : null,
+                nextPageLink = songs.HasNext ? CreateSongResourceUri(parameters, ResourceUriType.NextPage) : null
             };
 
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
@@ -104,7 +99,6 @@ namespace Hymnstagram.Web.Controllers.Api
             var dto = _mapper.Map<SongDto>(song);
             var newSong = Song.From(dto);
 
-            //TODO: Add validation
             songbook.Songs.Add(newSong);
 
             _repository.Save(songbook);
