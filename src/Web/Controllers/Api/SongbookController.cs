@@ -35,7 +35,7 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpGet(Name = "GetSongbooks")]
         public IActionResult Get(SongbookResourceParameters parameters)
         {
-            _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}");            
+            _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}", parameters.PageNumber, parameters.PageSize);            
 
             if(!_propertyMappingService.ValidMappingExistsFor<SongbookDto, Songbook>(parameters.OrderBy))
             {
@@ -136,7 +136,7 @@ namespace Hymnstagram.Web.Controllers.Api
                         pageSize = parameters.PageSize
                     });
                 default:
-                    return Url.Link("GetAuthors", new
+                    return Url.Link("GetSongbooks", new
                     {
                         pageNumber = parameters.PageNumber,
                         pageSize = parameters.PageSize

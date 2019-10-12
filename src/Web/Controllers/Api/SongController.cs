@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using AutoMapper;
 using Hymnstagram.Model.DataAccess;
 using Hymnstagram.Model.DataTransfer;
 using Hymnstagram.Model.Domain;
+using Hymnstagram.Web.Helpers;
+using Hymnstagram.Web.Helpers.Parameters;
 using Hymnstagram.Web.Models.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -26,22 +29,39 @@ namespace Hymnstagram.Web.Controllers.Api
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));            
         }
         
-        [HttpGet]
-        public IActionResult Get(Guid songbookId, [FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 20)
+        [HttpGet(Name = "GetSongs")]
+        public IActionResult Get(SongResourceParameters parameters)
         {
-            _logger.LogDebug("SongController.Get called with pageNumber {@pageNumber} and {@pageSize}", pageNumber, pageSize);
+            _logger.LogDebug("SongController.Get called with pageNumber {@pageNumber} and {@pageSize}", parameters.PageNumber, parameters.PageSize);                       
+            
             //TODO: Enable a way to retrieve child objects without returning the whole parent
-            var songbook = _repository.GetById(songbookId);
+            var songbook = _repository.GetById(parameters.SongbookId);
             if (songbook == null)
             {
                 return NotFound();
             }
 
-            pageSize = (pageSize > MAX_SONG_PAGE_SIZE) ? MAX_SONG_PAGE_SIZE : pageSize;
-            
-            var results = _mapper.Map<IEnumerable<SongResult>>(songbook.Songs.Skip(pageSize * (pageNumber - 1)).Take(pageSize));
+                                   
+            var songs = PagedList<SongResult>.Create(_mapper.Map<IEnumerable<SongResult>>(songbook.Songs.Skip(parameters.PageNumber - 1).Take(parameters.PageSize)), parameters.PageNumber, parameters.PageSize);
 
-            return Ok(results);
+            var previousPageLink = songs.HasPrevious ? CreateSongResourceUri(parameters, ResourceUriType.PreviousPage) : null;
+            var nextPageLink = songs.HasNext ? CreateSongResourceUri(parameters, ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = songs.TotalCount,
+                pageSize = songs.PageSize,
+                currentPage = songs.CurrentPage,
+                totalPages = songs.TotalPages,
+                previousPageLink = previousPageLink,
+                nextPageLink = nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            var results = _mapper.Map<IEnumerable<SongResult>>(songs);
+
+            return Ok(results.Select(CreateLinksForSong));
         }
 
         [HttpGet("{id}", Name = "GetSong")]
@@ -60,7 +80,9 @@ namespace Hymnstagram.Web.Controllers.Api
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<SongResult>(song));
+            var result = _mapper.Map<SongResult>(song);
+
+            return Ok(CreateLinksForSong(result));
         }
 
         [HttpPost]
@@ -119,12 +141,37 @@ namespace Hymnstagram.Web.Controllers.Api
             return Ok();
         }
 
-        private SongResult CreateLinksForSong(SongResult songbook)
+        private string CreateSongResourceUri(SongResourceParameters parameters, ResourceUriType type)
         {
-            songbook.Links.Add(new Link(Url.Link("GetSong", new { id = songbook.Id }), "self", "GET"));
-            songbook.Links.Add(new Link(Url.Link("DeleteSong", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link("GetSongs", new
+                    {
+                        pageNumber = parameters.PageNumber - 1,
+                        pageSize = parameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return Url.Link("GetSongs", new
+                    {
+                        pageNumber = parameters.PageNumber + 1,
+                        pageSize = parameters.PageSize
+                    });
+                default:
+                    return Url.Link("GetSongs", new
+                    {
+                        pageNumber = parameters.PageNumber,
+                        pageSize = parameters.PageSize
+                    });
+            }
+        }
 
-            return songbook;
+        private SongResult CreateLinksForSong(SongResult song)
+        {
+            song.Links.Add(new Link(Url.Link("GetSong", new { songbookId = song.SongbookId, id = song.Id }), "self", "GET"));
+            song.Links.Add(new Link(Url.Link("DeleteSong", new { songbookId = song.SongbookId, id = song.Id }), "delete_song", "DELETE"));            
+
+            return song;
         }
     }
 }

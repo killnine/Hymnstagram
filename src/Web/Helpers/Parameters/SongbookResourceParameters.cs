@@ -15,7 +15,7 @@
                 _pageSize = (value > MAX_SONGBOOK_PAGE_SIZE) ? MAX_SONGBOOK_PAGE_SIZE : value;
             }
         }
-
+                
         public string Title { get; set; }
         public string Publisher { get; set; }
         public string ISBN10 { get; set; }
