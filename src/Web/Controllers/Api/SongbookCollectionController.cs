@@ -8,6 +8,7 @@ using Hymnstagram.Model.DataTransfer;
 using Hymnstagram.Model.Domain;
 using Hymnstagram.Web.Helpers;
 using Hymnstagram.Web.Models.Api;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -43,6 +44,8 @@ namespace Hymnstagram.Web.Controllers.Api
         /// <param name="ids">Comma-separated list of songbook guids, wrapped in parenthesis.</param>
         /// <returns></returns>
         [HttpGet("({ids})", Name = "GetSongbookCollection")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult GetSongbookCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
         {
             if(ids == null)
@@ -67,7 +70,9 @@ namespace Hymnstagram.Web.Controllers.Api
         /// </summary>
         /// <param name="songbookCollection">An array of Songbook creation objects.</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost]        
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public IActionResult Post([FromBody]IEnumerable<SongbookCreate> songbookCollection)
         {
             if(songbookCollection == null)

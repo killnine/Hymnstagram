@@ -52,8 +52,14 @@ namespace Hymnstogram.Web
                                 ContentTypes = { "application/problem+json" }
                             };
                         };
-                    });            
-            services.AddRazorPages();
+                    });
+
+            services.AddMvc(setupAction =>
+            {
+                setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
+                setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
+                setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
+            });
 
             services.AddSingleton<ISongDao,SongDao>();
             services.AddSingleton<ISongbookDao, SongbookDao>();

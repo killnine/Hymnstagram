@@ -13,6 +13,7 @@ using Hymnstagram.Web.Helpers;
 using System.Text.Json;
 using System.Linq;
 using Hymnstagram.Web.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -47,6 +48,8 @@ namespace Hymnstagram.Web.Controllers.Api
         /// </summary>
         /// <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>        
         [HttpGet(Name = "GetSongbooks")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult Get(SongbookResourceParameters parameters)
         {
             _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}", parameters.PageNumber, parameters.PageSize);            
@@ -81,6 +84,8 @@ namespace Hymnstagram.Web.Controllers.Api
         /// <param name="id">Guid-based identifier for the songbook</param>
         /// <returns>Returns songbook object, related creators, and related songs.</returns>
         [HttpGet("{id}", Name = "GetSongbook")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult GetById(Guid id)
         {
             _logger.LogDebug("SongbookController.GetById called on id {@id}", id);
@@ -98,7 +103,9 @@ namespace Hymnstagram.Web.Controllers.Api
         /// Submits a new songbook to the system.
         /// </summary>
         /// <param name="songbook">Songbook object with all child references (Creators, Songs)</param>        
-        [HttpPost(Name = "CreateSongbook")]
+        [HttpPost(Name = "CreateSongbook")]        
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public IActionResult Post([FromBody]SongbookCreate songbook)
         {
             if(songbook == null)
@@ -123,6 +130,8 @@ namespace Hymnstagram.Web.Controllers.Api
         /// <param name="id">Guid-based songbook identifier.</param>
         /// <returns></returns>
         [HttpDelete("{id}", Name = "DeleteSongbook")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult Delete(Guid id)
         {
             if (id == null || id == Guid.Empty)

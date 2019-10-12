@@ -109,7 +109,7 @@
             Retrieves a list of songs based on search, sorting, and filtering criteria.
             </summary>
             <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>     
-            <remarks>A song requires the SongbookId parameter be passed in.</remarks>
+            <remarks>A song requires the SongbookId parameter be passed in.</remarks>        
         </member>
         <member name="M:Hymnstagram.Web.Controllers.Api.SongController.GetById(System.Guid,System.Guid)">
             <summary>

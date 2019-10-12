@@ -1,4 +1,5 @@
 ﻿using Hymnstagram.Web.Models.Api;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -30,6 +31,8 @@ namespace Hymnstagram.Web.Controllers.Api
         /// <param name="mediaType">Use 'application/vnd.hymnstagram.hateoas+json' for HATEOAS media details.</param>
         /// <returns></returns>
         [HttpGet(Name = "GetRoot")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult GetRoot([FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogDebug($"RootController.GetRoot called. (Header contents: {mediaType})");
