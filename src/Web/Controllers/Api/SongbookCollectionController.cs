@@ -18,15 +18,13 @@ namespace Hymnstagram.Web.Controllers.Api
     {
         private readonly ILogger<SongbookCollectionController> _logger;
         private readonly IMapper _mapper;
-        private readonly ISongbookRepository _repository;
-        private readonly IUrlHelper _urlHelper;
+        private readonly ISongbookRepository _repository;        
 
-        public SongbookCollectionController(ILogger<SongbookCollectionController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper)
+        public SongbookCollectionController(ILogger<SongbookCollectionController> logger, IMapper mapper, ISongbookRepository repository)
         {
             _logger = logger;
             _mapper = mapper;
-            _repository = repository;
-            _urlHelper = urlHelper;
+            _repository = repository;            
         }
 
         [HttpGet("({ids})", Name = "GetSongbookCollection")]
@@ -71,8 +69,8 @@ namespace Hymnstagram.Web.Controllers.Api
 
         private SongbookResult CreateLinksForSongbook(SongbookResult songbook)
         {
-            songbook.Links.Add(new Link(_urlHelper.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
-            songbook.Links.Add(new Link(_urlHelper.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+            songbook.Links.Add(new Link(Url.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
+            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
 
             return songbook;
         }

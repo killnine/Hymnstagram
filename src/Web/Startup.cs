@@ -36,13 +36,7 @@ namespace Hymnstogram.Web
             services.AddSingleton<ICreatorDao, CreatorDao>();
             services.AddSingleton<ISongbookRepository, SongbookRepository>();
 
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
-            {
-
-                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;                
-                return new UrlHelper(actionContext);
-            });
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();            
 
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 

@@ -21,20 +21,18 @@ namespace Hymnstagram.Web.Controllers.Api
     {
         private readonly ILogger<SongbookController> _logger;
         private readonly IMapper _mapper;
-        private readonly ISongbookRepository _repository;
-        private readonly IUrlHelper _urlHelper;
+        private readonly ISongbookRepository _repository;        
         private readonly IPropertyMappingService _propertyMappingService;        
 
-        public SongbookController(ILogger<SongbookController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper, IPropertyMappingService propertyMappingService)
+        public SongbookController(ILogger<SongbookController> logger, IMapper mapper, ISongbookRepository repository, IPropertyMappingService propertyMappingService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _urlHelper = urlHelper ?? throw new ArgumentNullException(nameof(urlHelper));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));            
             _propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetSongbooks")]
         public IActionResult Get(SongbookResourceParameters parameters)
         {
             _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}");            
@@ -45,8 +43,7 @@ namespace Hymnstagram.Web.Controllers.Api
             }
 
             var songbooks = _repository.GetSongbookByCriteria(_mapper.Map<SongbookSearchCriteria>(parameters));
-
-
+            
             var previousPageLink = songbooks.HasPrevious ? CreateSongbookResourceUri(parameters, ResourceUriType.PreviousPage) : null;
             var nextPageLink = songbooks.HasNext ? CreateSongbookResourceUri(parameters, ResourceUriType.NextPage) : null;
 
@@ -127,19 +124,19 @@ namespace Hymnstagram.Web.Controllers.Api
             switch(type)
             {
                 case ResourceUriType.PreviousPage:
-                    return _urlHelper.Link("GetSongbooks", new
+                    return Url.Link("GetSongbooks", new
                     {
                         pageNumber = parameters.PageNumber - 1,
                         pageSize = parameters.PageSize
                     });
                 case ResourceUriType.NextPage:
-                    return _urlHelper.Link("GetSongbooks", new
+                    return Url.Link("GetSongbooks", new
                     {
                         pageNumber = parameters.PageNumber + 1,
                         pageSize = parameters.PageSize
                     });
                 default:
-                    return _urlHelper.Link("GetAuthors", new
+                    return Url.Link("GetAuthors", new
                     {
                         pageNumber = parameters.PageNumber,
                         pageSize = parameters.PageSize
@@ -149,8 +146,8 @@ namespace Hymnstagram.Web.Controllers.Api
 
         private SongbookResult CreateLinksForSongbook(SongbookResult songbook)
         {
-            songbook.Links.Add(new Link(_urlHelper.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
-            songbook.Links.Add(new Link(_urlHelper.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+            songbook.Links.Add(new Link(Url.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
+            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
 
             return songbook;
         }

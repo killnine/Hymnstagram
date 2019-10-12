@@ -17,15 +17,13 @@ namespace Hymnstagram.Web.Controllers.Api
         private const int MAX_SONG_PAGE_SIZE = 50;
         private readonly ILogger<SongController> _logger;
         private readonly ISongbookRepository _repository;
-        private readonly IMapper _mapper;
-        private readonly IUrlHelper _urlHelper;
+        private readonly IMapper _mapper;        
 
-        public SongController(ILogger<SongController> logger, IMapper mapper, ISongbookRepository repository, IUrlHelper urlHelper)
+        public SongController(ILogger<SongController> logger, IMapper mapper, ISongbookRepository repository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _urlHelper = urlHelper ?? throw new ArgumentNullException(nameof(urlHelper));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));            
         }
         
         [HttpGet]
@@ -123,8 +121,8 @@ namespace Hymnstagram.Web.Controllers.Api
 
         private SongResult CreateLinksForSong(SongResult songbook)
         {
-            songbook.Links.Add(new Link(_urlHelper.Link("GetSong", new { id = songbook.Id }), "self", "GET"));
-            songbook.Links.Add(new Link(_urlHelper.Link("DeleteSong", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+            songbook.Links.Add(new Link(Url.Link("GetSong", new { id = songbook.Id }), "self", "GET"));
+            songbook.Links.Add(new Link(Url.Link("DeleteSong", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
 
             return songbook;
         }
