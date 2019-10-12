@@ -18,6 +18,7 @@ namespace Hymnstagram.Web.Controllers.Api
     /// The SongbookCollection controller enables users to submit multiple songbooks into the system
     /// via a single API call.
     /// </summary>
+    [Produces("application/json")]
     [Route("api/songbookcollections")]
     public class SongbookCollectionController : Controller
     {

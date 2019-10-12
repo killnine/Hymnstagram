@@ -31,9 +31,9 @@ namespace Hymnstogram.Web
                 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers()
+            services.AddControllers()                    
                     .ConfigureApiBehaviorOptions(setupAction =>
-                    {
+                    {                        
                         setupAction.InvalidModelStateResponseFactory = context =>
                         {
                             var problemDetails = new ValidationProblemDetails(context.ModelState)
@@ -56,6 +56,10 @@ namespace Hymnstogram.Web
 
             services.AddMvc(setupAction =>
             {
+                //Return 406 'Not Acceptable' for any unsupported media types
+                setupAction.ReturnHttpNotAcceptable = true;
+
+                //Create default response types for all controllers
                 setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
                 setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
                 setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
@@ -147,9 +151,7 @@ namespace Hymnstogram.Web
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");                
+                endpoints.MapControllers();
             });            
         }
     }

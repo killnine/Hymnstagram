@@ -20,6 +20,7 @@ namespace Hymnstagram.Web.Controllers.Api
     /// <summary>
     /// The Songbook controller enables users to create, read, and delete songbooks from the system. 
     /// </summary>
+    [Produces("application/json")]
     [Route("api/songbooks")]
     public class SongbookController : Controller
     {

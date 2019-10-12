@@ -10,7 +10,8 @@ namespace Hymnstagram.Web.Controllers.Api
     /// The Root controller is a default endpoint where users can get a summary
     /// of the most common actions available on the API.
     /// </summary>
-    [Route("api")]
+    [Produces("application/json", "application/vnd.hymnstagram.hateoas+json")]
+    [Route("api")]    
     public class RootController : Controller
     {
         private const string VENDOR_MEDIA_TYPE = "application/vnd.hymnstagram.hateoas+json";
