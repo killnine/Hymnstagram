@@ -80,6 +80,19 @@ namespace Hymnstogram.Web
                 setupAction.SwaggerDoc("HymnstagramOpenAPISpecification", new Microsoft.OpenApi.Models.OpenApiInfo()
                 {
                     Title = "Library API",
+                    Description = "Create, read, and delete songbooks and songs your congregation uses.",
+                    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                    {
+                        Email = "administrator@hymnstagram.com",
+                        Name = "Hymnstagram Development",
+                        Url = new Uri("https://www.hymnstagram.com")
+                    },
+                    License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                    {
+                        Name = "MIT License",
+                        Url = new Uri("https://opensource.org/licenses/MIT")
+                    },
+                    //TermsOfService = new Uri(""),
                     Version = "1"
                 });
 

@@ -91,6 +91,50 @@
             <param name="id">Guid-based songbook identifier.</param>
             <returns></returns>
         </member>
+        <member name="T:Hymnstagram.Web.Controllers.Api.SongController">
+            <summary>
+            The Song controller enables users to create, read, and delete songs from a specific songbook.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.#ctor(Microsoft.Extensions.Logging.ILogger{Hymnstagram.Web.Controllers.Api.SongController},AutoMapper.IMapper,Hymnstagram.Model.DataAccess.ISongbookRepository)">
+            <summary>
+            Song constructor.
+            </summary>
+            <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+            <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
+            <param name="repository">Data access repository.</param>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.Get(Hymnstagram.Web.Helpers.Parameters.SongResourceParameters)">
+            <summary>
+            Retrieves a list of songs based on search, sorting, and filtering criteria.
+            </summary>
+            <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>     
+            <remarks>A song requires the SongbookId parameter be passed in.</remarks>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.GetById(System.Guid,System.Guid)">
+            <summary>
+            Retrieves a single song and all child content
+            </summary>
+            <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
+            <param name="id">Guid-based identifier for the song</param>
+            <returns>Returns song object and related creators.</returns>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.Post(System.Guid,Hymnstagram.Web.Models.Api.SongCreate)">
+            <summary>
+            Submits a new songbook to the system.
+            </summary>
+            <param name="songbookId">Guid-based identifier for the songbook the song will be applied to</param>
+            <param name="song">New song object</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.Delete(System.Guid,System.Guid)">
+            <summary>
+            Deletes a song from the system based on a specific songbook id and song id.
+            </summary>
+            <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
+            <param name="id">Guid-based identifier for the song</param>
+            <returns></returns>
+        </member>
         <member name="T:Hymnstagram.Web.Helpers.ArrayModelBinder">
             <summary>
             ArrayModelBinder courtesy of Kevin Dockx' Pluralsight Course: https://app.pluralsight.com/library/courses/asp-dot-net-core-restful-api-building/
