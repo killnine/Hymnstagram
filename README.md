@@ -1,4 +1,4 @@
-﻿# Hymnstogram #
+﻿# Hymnstagram #
 
 [![Build status](https://ci.appveyor.com/api/projects/status/b83gpw3lahy8g516?svg=true)](https://ci.appveyor.com/project/killnine/hymnstagram)
 
