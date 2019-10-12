@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Hymnstagram.Web.Models.Api
 {
+#pragma warning disable CS1591
     public class SongbookResult : LinkedResourceBase
     {
         public Guid Id { get; set; }
@@ -13,4 +14,5 @@ namespace Hymnstagram.Web.Models.Api
         public IList<CreatorResult> Creators { get; set; } = new List<CreatorResult>();
         public IList<SongResult> Songs { get; set; } = new List<SongResult>();
     }
+#pragma warning restore CS1591
 }

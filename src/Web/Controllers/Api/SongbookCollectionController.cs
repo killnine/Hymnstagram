@@ -13,6 +13,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
+    /// <summary>
+    /// The SongbookCollection controller enables users to submit multiple songbooks into the system
+    /// via a single API call.
+    /// </summary>
     [Route("api/songbookcollections")]
     public class SongbookCollectionController : Controller
     {
@@ -20,6 +24,12 @@ namespace Hymnstagram.Web.Controllers.Api
         private readonly IMapper _mapper;
         private readonly ISongbookRepository _repository;        
 
+        /// <summary>
+        /// SongbookCollection constructor.
+        /// </summary>
+        /// <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+        /// <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
+        /// <param name="repository">Data access repository.</param>
         public SongbookCollectionController(ILogger<SongbookCollectionController> logger, IMapper mapper, ISongbookRepository repository)
         {
             _logger = logger;
@@ -27,6 +37,11 @@ namespace Hymnstagram.Web.Controllers.Api
             _repository = repository;            
         }
 
+        /// <summary>
+        /// Retrieves a collection of songbooks, given a list of songbook ids.
+        /// </summary>        
+        /// <param name="ids">Comma-separated list of songbook guids, wrapped in parenthesis.</param>
+        /// <returns></returns>
         [HttpGet("({ids})", Name = "GetSongbookCollection")]
         public IActionResult GetSongbookCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
         {
@@ -47,6 +62,11 @@ namespace Hymnstagram.Web.Controllers.Api
             return Ok(songbooksToReturn.Select(CreateLinksForSongbook));
         }
 
+        /// <summary>
+        /// Submit a list of songbooks to the API at once.
+        /// </summary>
+        /// <param name="songbookCollection">An array of Songbook creation objects.</param>
+        /// <returns></returns>
         [HttpPost]
         public IActionResult Post([FromBody]IEnumerable<SongbookCreate> songbookCollection)
         {

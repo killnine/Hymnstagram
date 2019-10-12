@@ -5,12 +5,20 @@ using System.Collections.Generic;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
+    /// <summary>
+    /// The Root controller is a default endpoint where users can get a summary
+    /// of the most common actions available on the API.
+    /// </summary>
     [Route("api")]
     public class RootController : Controller
     {
         private const string VENDOR_MEDIA_TYPE = "application/vnd.hymnstagram.hateoas+json";
         private readonly ILogger<RootController> _logger;
 
+        /// <summary>
+        /// Root constructor.
+        /// </summary>
+        /// <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
         public RootController(ILogger<RootController> logger)
         {
             _logger = logger;
@@ -24,7 +32,7 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpGet(Name = "GetRoot")]
         public IActionResult GetRoot([FromHeader(Name = "Accept")] string mediaType)
         {
-            _logger.LogDebug("RootController.GetRoot called.");
+            _logger.LogDebug($"RootController.GetRoot called. (Header contents: {mediaType})");
 
             if (mediaType == VENDOR_MEDIA_TYPE)
             {

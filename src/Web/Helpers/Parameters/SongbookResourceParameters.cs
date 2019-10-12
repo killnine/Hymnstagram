@@ -1,6 +1,8 @@
 ﻿namespace Hymnstagram.Web.Helpers.Parameters
 {
+#pragma warning disable CS1591
     public class SongbookResourceParameters
+
     {
         private const int MAX_SONGBOOK_PAGE_SIZE = 50;
 
@@ -23,4 +25,5 @@
 
         public string OrderBy { get; set; } = "Title";
     }
+#pragma warning restore CS1591
 }

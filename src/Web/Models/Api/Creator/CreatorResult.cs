@@ -2,6 +2,7 @@
 
 namespace Hymnstagram.Web.Models.Api
 {
+#pragma warning disable CS1591
     public class CreatorResult
     {
         public Guid Id { get; set; }
@@ -10,4 +11,5 @@ namespace Hymnstagram.Web.Models.Api
         public string LastName { get; set; }
         public string Type { get; set; }
     }
+#pragma warning restore CS1591
 }
