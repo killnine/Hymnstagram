@@ -16,6 +16,11 @@ namespace Hymnstagram.Web.Controllers.Api
             _logger = logger;
         }
 
+        /// <summary>
+        /// Returns the standard endpoints into the API
+        /// </summary>
+        /// <param name="mediaType">Use 'application/vnd.hymnstagram.hateoas+json' for HATEOAS media details.</param>
+        /// <returns></returns>
         [HttpGet(Name = "GetRoot")]
         public IActionResult GetRoot([FromHeader(Name = "Accept")] string mediaType)
         {

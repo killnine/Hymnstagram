@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace Hymnstogram.Web
 {
@@ -28,30 +31,28 @@ namespace Hymnstogram.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(setupAction =>
-            {
-                setupAction.ReturnHttpNotAcceptable = true;
-            }).ConfigureApiBehaviorOptions(setupAction =>
-            {
-                setupAction.InvalidModelStateResponseFactory = context =>
-                {
-                    var problemDetails = new ValidationProblemDetails(context.ModelState)
+            services.AddControllers()
+                    .ConfigureApiBehaviorOptions(setupAction =>
                     {
-                        Type = "https://courselibrary.com/modelvalidationproblem",
-                        Title = "One or more model validation errors occurred.",
-                        Status = StatusCodes.Status422UnprocessableEntity,
-                        Detail = "See the rrors property for details",
-                        Instance = context.HttpContext.Request.Path
-                    };
+                        setupAction.InvalidModelStateResponseFactory = context =>
+                        {
+                            var problemDetails = new ValidationProblemDetails(context.ModelState)
+                            {
+                                Type = "https://courselibrary.com/modelvalidationproblem",
+                                Title = "One or more model validation errors occurred.",
+                                Status = StatusCodes.Status422UnprocessableEntity,
+                                Detail = "See the rrors property for details",
+                                Instance = context.HttpContext.Request.Path
+                            };
 
-                    problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+                            problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
 
-                    return new UnprocessableEntityObjectResult(problemDetails)
-                    {
-                        ContentTypes = { "application/problem+json" }
-                    };
-                };
-            });            
+                            return new UnprocessableEntityObjectResult(problemDetails)
+                            {
+                                ContentTypes = { "application/problem+json" }
+                            };
+                        };
+                    });            
             services.AddRazorPages();
 
             services.AddSingleton<ISongDao,SongDao>();
@@ -73,6 +74,19 @@ namespace Hymnstogram.Web
 
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
+
+            services.AddSwaggerGen(setupAction =>
+            {
+                setupAction.SwaggerDoc("HymnstagramOpenAPISpecification", new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                    Title = "Library API",
+                    Version = "1"
+                });
+
+                var xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFile);
+                setupAction.IncludeXmlComments(xmlCommentsFullPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,6 +112,14 @@ namespace Hymnstogram.Web
             }            
 
             app.UseHttpsRedirection();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(setupAction =>
+            {
+                setupAction.SwaggerEndpoint("/swagger/HymnstagramOpenAPISpecification/swagger.json", "Library API");
+                setupAction.RoutePrefix = "";
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -108,9 +130,8 @@ namespace Hymnstogram.Web
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapRazorPages();
-            });
+                    pattern: "{controller=Home}/{action=Index}/{id?}");                
+            });            
         }
     }
 }
