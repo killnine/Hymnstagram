@@ -1,5 +1,8 @@
 ﻿# Hymnstogram #
 
+[![Build status](https://ci.appveyor.com/api/projects/status/b83gpw3lahy8g516?svg=true)](https://ci.appveyor.com/project/killnine/hymnstagram)
+
+
 ## Types and Relationships ##
 
 ### Types ###
@@ -33,11 +36,11 @@ This means that Creators are more complex, with their own table separate from a 
 
 ## Technologies ##
 
-* Asp.net Core 3.0
-* Serilog
-* StructureMap 
+* Asp.net Core 3.0 - Done
+* Serilog          - Done
+* StructureMap  
 * Dapper
-* Swagger
+* Swagger          - Done
 * (Miniprofiler)[https://miniprofiler.com/dotnet/ConsoleDotNet]
 * SqlServer
 * (Experimental) IdentityServer
