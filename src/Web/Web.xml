@@ -63,7 +63,7 @@
             <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
             <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
             <param name="repository">Data access repository.</param>
-            <param name="propertyMappingService">The property-mapping service enables sorting by cross-referencing string field names to properties on the songbook objects</param>
+            <param name="propertyMappingService">The property-mapping service enables sorting by cross-referencing string field names to properties on the songbook objects</param>        
         </member>
         <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.Get(Hymnstagram.Web.Helpers.Parameters.SongbookResourceParameters)">
             <summary>
@@ -71,11 +71,11 @@
             </summary>
             <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>        
         </member>
-        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.GetById(System.Guid)">
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.Get(System.Guid)">
             <summary>
             Retrieves a single songbook and all child content
             </summary>
-            <param name="id">Guid-based identifier for the songbook</param>
+            <param name="id">Guid-based identifier for the songbook</param>        
             <returns>Returns songbook object, related creators, and related songs.</returns>
         </member>
         <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.Post(Hymnstagram.Web.Models.Api.SongbookCreate)">
@@ -232,8 +232,8 @@
             <summary>
             Description of action
             </summary>
-            <remarks>Should be single word, PascalCasing.</remarks>
-            <example>GetSong</example>
+            <remarks>Should be lower-case with words separated by underscores.</remarks>
+            <example>delete_song</example>
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.Link.Method">
             <summary>

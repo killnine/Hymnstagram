@@ -9,6 +9,7 @@ using Hymnstagram.Model.Domain;
 using Hymnstagram.Web.Helpers;
 using Hymnstagram.Web.Helpers.Parameters;
 using Hymnstagram.Web.Models.Api;
+using Hymnstagram.Web.Models.Api.Song;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ namespace Hymnstagram.Web.Controllers.Api
     /// The Song controller enables users to create, read, and delete songs from a specific songbook.
     /// </summary>
     [Produces("application/json")]
+    [Consumes("application/json")]
     [Route("api/songbooks/{songbookId}/songs")]    
     public class SongController : Controller
     {
@@ -65,16 +67,15 @@ namespace Hymnstagram.Web.Controllers.Api
                 totalCount = songs.TotalCount,
                 pageSize = songs.PageSize,
                 currentPage = songs.CurrentPage,
-                totalPages = songs.TotalPages,
-                previousPageLink = songs.HasPrevious ? CreateSongResourceUri(parameters, ResourceUriType.PreviousPage) : null,
-                nextPageLink = songs.HasNext ? CreateSongResourceUri(parameters, ResourceUriType.NextPage) : null
+                totalPages = songs.TotalPages                
             };
 
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
-            var results = _mapper.Map<IEnumerable<SongResult>>(songs);
+            var songResults = _mapper.Map<IEnumerable<SongResult>>(songs);
+            var collectionResult = new SongCollectionResult() { Results = songResults, Links = CreateLinksForSongs(parameters, songs.HasNext, songs.HasPrevious) };
 
-            return Ok(results.Select(CreateLinksForSong));
+            return Ok(collectionResult);
         }
 
         /// <summary>
@@ -209,6 +210,26 @@ namespace Hymnstagram.Web.Controllers.Api
             song.Links.Add(new Link(Url.Link("DeleteSong", new { songbookId = song.SongbookId, id = song.Id }), "delete_song", "DELETE"));            
 
             return song;
+        }
+
+        private List<Link> CreateLinksForSongs(SongResourceParameters parameters, bool hasNext, bool hasPrevious)
+        {
+            var links = new List<Link>();
+
+            links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.Current), "self", "GET"));
+            links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.Current), "delete_song", "DELETE"));            
+
+            if(hasNext)
+            {
+                links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.NextPage), "next_page", "GET"));
+            }
+
+            if(hasPrevious)
+            {
+                links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.PreviousPage), "previous_page", "GET"));
+            }
+
+            return links;
         }
     }
 }

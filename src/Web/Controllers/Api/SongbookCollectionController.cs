@@ -19,6 +19,7 @@ namespace Hymnstagram.Web.Controllers.Api
     /// via a single API call.
     /// </summary>
     [Produces("application/json")]
+    [Consumes("application/json")]
     [Route("api/songbookcollections")]
     public class SongbookCollectionController : Controller
     {
@@ -47,7 +48,7 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpGet("({ids})", Name = "GetSongbookCollection")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetSongbookCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
+        public ActionResult<IEnumerable<SongbookResult>> GetSongbookCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
         {
             if(ids == null)
             {
@@ -74,7 +75,7 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpPost]        
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public IActionResult Post([FromBody]IEnumerable<SongbookCreate> songbookCollection)
+        public ActionResult<IEnumerable<SongbookResult>> Post([FromBody]IEnumerable<SongbookCreate> songbookCollection)
         {
             if(songbookCollection == null)
             {
@@ -96,7 +97,7 @@ namespace Hymnstagram.Web.Controllers.Api
         private SongbookResult CreateLinksForSongbook(SongbookResult songbook)
         {
             songbook.Links.Add(new Link(Url.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
-            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));
 
             return songbook;
         }

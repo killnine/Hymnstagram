@@ -4,7 +4,8 @@
     public enum ResourceUriType
     {
         PreviousPage,
-        NextPage
+        NextPage,
+        Current
     }
 #pragma warning restore CS1591
 }

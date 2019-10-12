@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Linq;
 using Hymnstagram.Web.Services;
 using Microsoft.AspNetCore.Http;
+using Hymnstagram.Web.Models.Api.Songbook;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -21,13 +22,14 @@ namespace Hymnstagram.Web.Controllers.Api
     /// The Songbook controller enables users to create, read, and delete songbooks from the system. 
     /// </summary>
     [Produces("application/json")]
+    [Consumes("application/json")]
     [Route("api/songbooks")]
     public class SongbookController : Controller
     {
         private readonly ILogger<SongbookController> _logger;
         private readonly IMapper _mapper;
         private readonly ISongbookRepository _repository;        
-        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyMappingService _propertyMappingService;        
 
         /// <summary>
         /// Songbook constructor.
@@ -35,13 +37,13 @@ namespace Hymnstagram.Web.Controllers.Api
         /// <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
         /// <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
         /// <param name="repository">Data access repository.</param>
-        /// <param name="propertyMappingService">The property-mapping service enables sorting by cross-referencing string field names to properties on the songbook objects</param>
+        /// <param name="propertyMappingService">The property-mapping service enables sorting by cross-referencing string field names to properties on the songbook objects</param>        
         public SongbookController(ILogger<SongbookController> logger, IMapper mapper, ISongbookRepository repository, IPropertyMappingService propertyMappingService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));            
-            _propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
+            _propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));            
         }
 
         /// <summary>
@@ -51,11 +53,11 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpGet(Name = "GetSongbooks")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Get(SongbookResourceParameters parameters)
+        public ActionResult<SongbookCollectionResult> Get(SongbookResourceParameters parameters)
         {
-            _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}", parameters.PageNumber, parameters.PageSize);            
+            _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}", parameters.PageNumber, parameters.PageSize);                      
 
-            if(!_propertyMappingService.ValidMappingExistsFor<SongbookDto, Songbook>(parameters.OrderBy))
+            if (!_propertyMappingService.ValidMappingExistsFor<SongbookDto, Songbook>(parameters.OrderBy))
             {
                 return BadRequest();
             }
@@ -67,27 +69,26 @@ namespace Hymnstagram.Web.Controllers.Api
                 totalCount = songbooks.TotalCount,
                 pageSize = songbooks.PageSize,
                 currentPage = songbooks.CurrentPage,
-                totalPages = songbooks.TotalPages,
-                previousPageLink = songbooks.HasPrevious ? CreateSongbookResourceUri(parameters, ResourceUriType.PreviousPage) : null,
-                nextPageLink = songbooks.HasNext ? CreateSongbookResourceUri(parameters, ResourceUriType.NextPage) : null
+                totalPages = songbooks.TotalPages                
             };
 
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
-            var results = _mapper.Map<IEnumerable<SongbookResult>>(songbooks);
+            var songbookResults = _mapper.Map<IEnumerable<SongbookResult>>(songbooks);
+            var collectionResult = new SongbookCollectionResult() { Results = songbookResults, Links = CreateLinksForSongbooks(parameters, songbooks.HasNext, songbooks.HasPrevious) };
 
-            return Ok(results.Select(CreateLinksForSongbook));
+            return Ok(collectionResult);
         }
 
         /// <summary>
         /// Retrieves a single songbook and all child content
         /// </summary>
-        /// <param name="id">Guid-based identifier for the songbook</param>
+        /// <param name="id">Guid-based identifier for the songbook</param>        
         /// <returns>Returns songbook object, related creators, and related songs.</returns>
         [HttpGet("{id}", Name = "GetSongbook")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetById(Guid id)
+        public ActionResult<SongbookResult> Get(Guid id)
         {
             _logger.LogDebug("SongbookController.GetById called on id {@id}", id);
             var songbook = _repository.GetById(id);
@@ -107,7 +108,7 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpPost(Name = "CreateSongbook")]        
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public IActionResult Post([FromBody]SongbookCreate songbook)
+        public ActionResult<SongbookResult> Post([FromBody]SongbookCreate songbook)
         {
             if(songbook == null)
             {
@@ -133,7 +134,7 @@ namespace Hymnstagram.Web.Controllers.Api
         [HttpDelete("{id}", Name = "DeleteSongbook")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Delete(Guid id)
+        public ActionResult Delete(Guid id)
         {
             if (id == null || id == Guid.Empty)
             {
@@ -170,6 +171,7 @@ namespace Hymnstagram.Web.Controllers.Api
                         pageNumber = parameters.PageNumber + 1,
                         pageSize = parameters.PageSize
                     });
+                case ResourceUriType.Current:
                 default:
                     return Url.Link("GetSongbooks", new
                     {
@@ -182,9 +184,29 @@ namespace Hymnstagram.Web.Controllers.Api
         private SongbookResult CreateLinksForSongbook(SongbookResult songbook)
         {
             songbook.Links.Add(new Link(Url.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
-            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));
 
             return songbook;
+        }
+
+        private List<Link> CreateLinksForSongbooks(SongbookResourceParameters parameters, bool hasNext, bool hasPrevious)
+        {
+            var links = new List<Link>();
+
+            links.Add(new Link(CreateSongbookResourceUri(parameters, ResourceUriType.Current), "self", "GET"));
+            links.Add(new Link(CreateSongbookResourceUri(parameters, ResourceUriType.Current), "delete_songbook", "DELETE"));            
+            
+            if(hasNext)
+            {
+                links.Add(new Link(CreateSongbookResourceUri(parameters, ResourceUriType.NextPage), "next_page", "GET"));
+            }
+
+            if(hasPrevious)
+            {
+                links.Add(new Link(CreateSongbookResourceUri(parameters, ResourceUriType.PreviousPage), "previous_page", "GET"));
+            }            
+
+            return links;
         }
     }
 }

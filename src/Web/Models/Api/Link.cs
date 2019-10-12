@@ -15,8 +15,8 @@
         /// <summary>
         /// Description of action
         /// </summary>
-        /// <remarks>Should be single word, PascalCasing.</remarks>
-        /// <example>GetSong</example>
+        /// <remarks>Should be lower-case with words separated by underscores.</remarks>
+        /// <example>delete_song</example>
         public string Rel { get; private set; }
 
         /// <summary>

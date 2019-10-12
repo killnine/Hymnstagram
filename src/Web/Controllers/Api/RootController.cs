@@ -11,6 +11,7 @@ namespace Hymnstagram.Web.Controllers.Api
     /// of the most common actions available on the API.
     /// </summary>
     [Produces("application/json", "application/vnd.hymnstagram.hateoas+json")]
+    [Consumes("application/json")]
     [Route("api")]    
     public class RootController : Controller
     {
