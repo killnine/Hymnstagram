@@ -7,6 +7,7 @@ using System.IO;
 
 namespace Hymnstogram.Web
 {
+#pragma warning disable CS1591
     public class Program
     {
         //From Nicholas Blumhardt's excellent blog: https://nblumhardt.com/2017/08/use-serilog/
@@ -51,4 +52,5 @@ namespace Hymnstogram.Web
                 })
                 .UseSerilog();
     }
+#pragma warning restore CS1591
 }

@@ -12,6 +12,11 @@ namespace Hymnstagram.Web.Helpers
     /// </summary>
     public class ArrayModelBinder : IModelBinder
     {
+        /// <summary>
+        /// Performs model binding of a comma-separate list to an array.
+        /// </summary>
+        /// <param name="bindingContext"></param>
+        /// <returns></returns>
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             // Out binder only works on enumerable types

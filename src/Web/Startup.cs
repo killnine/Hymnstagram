@@ -9,14 +9,18 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace Hymnstogram.Web
 {
+    #pragma warning disable CS1591 
     public class Startup
+
     {
         public Startup(IConfiguration configuration)
         {
@@ -24,35 +28,42 @@ namespace Hymnstogram.Web
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+                
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(setupAction =>
+            services.AddControllers()                    
+                    .ConfigureApiBehaviorOptions(setupAction =>
+                    {                        
+                        setupAction.InvalidModelStateResponseFactory = context =>
+                        {
+                            var problemDetails = new ValidationProblemDetails(context.ModelState)
+                            {
+                                Type = "https://courselibrary.com/modelvalidationproblem",
+                                Title = "One or more model validation errors occurred.",
+                                Status = StatusCodes.Status422UnprocessableEntity,
+                                Detail = "See the rrors property for details",
+                                Instance = context.HttpContext.Request.Path
+                            };
+
+                            problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+                            return new UnprocessableEntityObjectResult(problemDetails)
+                            {
+                                ContentTypes = { "application/problem+json" }
+                            };
+                        };
+                    });
+
+            services.AddMvc(setupAction =>
             {
+                //Return 406 'Not Acceptable' for any unsupported media types
                 setupAction.ReturnHttpNotAcceptable = true;
-            }).ConfigureApiBehaviorOptions(setupAction =>
-            {
-                setupAction.InvalidModelStateResponseFactory = context =>
-                {
-                    var problemDetails = new ValidationProblemDetails(context.ModelState)
-                    {
-                        Type = "https://courselibrary.com/modelvalidationproblem",
-                        Title = "One or more model validation errors occurred.",
-                        Status = StatusCodes.Status422UnprocessableEntity,
-                        Detail = "See the rrors property for details",
-                        Instance = context.HttpContext.Request.Path
-                    };
 
-                    problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
-
-                    return new UnprocessableEntityObjectResult(problemDetails)
-                    {
-                        ContentTypes = { "application/problem+json" }
-                    };
-                };
-            });            
-            services.AddRazorPages();
+                //Create default response types for all controllers
+                setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
+                setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
+                setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
+            });
 
             services.AddSingleton<ISongDao,SongDao>();
             services.AddSingleton<ISongbookDao, SongbookDao>();
@@ -73,6 +84,32 @@ namespace Hymnstogram.Web
 
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
+
+            services.AddSwaggerGen(setupAction =>
+            {
+                setupAction.SwaggerDoc("HymnstagramOpenAPISpecification", new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                    Title = "Library API",
+                    Description = "Create, read, and delete songbooks and songs your congregation uses.",
+                    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                    {
+                        Email = "administrator@hymnstagram.com",
+                        Name = "Hymnstagram Development",
+                        Url = new Uri("https://www.hymnstagram.com")
+                    },
+                    License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                    {
+                        Name = "MIT License",
+                        Url = new Uri("https://opensource.org/licenses/MIT")
+                    },
+                    //TermsOfService = new Uri(""),
+                    Version = "1"
+                });
+
+                var xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFile);
+                setupAction.IncludeXmlComments(xmlCommentsFullPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,6 +135,14 @@ namespace Hymnstogram.Web
             }            
 
             app.UseHttpsRedirection();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(setupAction =>
+            {
+                setupAction.SwaggerEndpoint("/swagger/HymnstagramOpenAPISpecification/swagger.json", "Library API");
+                setupAction.RoutePrefix = "";
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -106,11 +151,9 @@ namespace Hymnstogram.Web
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapRazorPages();
-            });
+                endpoints.MapControllers();
+            });            
         }
     }
+    #pragma warning restore CS1591
 }

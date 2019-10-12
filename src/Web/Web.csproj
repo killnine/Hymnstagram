@@ -13,6 +13,11 @@
   </PropertyGroup>
 
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>Web.xml</DocumentationFile>
+  </PropertyGroup>
+
+
   <ItemGroup>
     <Compile Remove="Helpers\PagedList.cs" />
   </ItemGroup>
@@ -29,6 +34,7 @@
     <PackageReference Include="Serilog.Sinks.Debug" Version="1.0.1" />
     <PackageReference Include="Serilog.Sinks.ElasticSearch" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataAccess.Memory\DataAccess.Memory.csproj" />

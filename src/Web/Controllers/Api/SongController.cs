@@ -9,27 +9,47 @@ using Hymnstagram.Model.Domain;
 using Hymnstagram.Web.Helpers;
 using Hymnstagram.Web.Helpers.Parameters;
 using Hymnstagram.Web.Models.Api;
+using Hymnstagram.Web.Models.Api.Song;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
-    [Route("api/songbooks/{songbookId}/songs")]
+    /// <summary>
+    /// The Song controller enables users to create, read, and delete songs from a specific songbook.
+    /// </summary>
+    [Produces("application/json")]
+    [Consumes("application/json")]
+    [Route("api/songbooks/{songbookId}/songs")]    
     public class SongController : Controller
     {
         private readonly ILogger<SongController> _logger;
         private readonly ISongbookRepository _repository;
-        private readonly IMapper _mapper;        
+        private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Song constructor.
+        /// </summary>
+        /// <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+        /// <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
+        /// <param name="repository">Data access repository.</param>
         public SongController(ILogger<SongController> logger, IMapper mapper, ISongbookRepository repository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));            
         }
-        
+
+        /// <summary>
+        /// Retrieves a list of songs based on search, sorting, and filtering criteria.
+        /// </summary>
+        /// <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>     
+        /// <remarks>A song requires the SongbookId parameter be passed in.</remarks>        
         [HttpGet(Name = "GetSongs")]
-        public IActionResult Get(SongResourceParameters parameters)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]        
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<IEnumerable<SongResult>> Get(SongResourceParameters parameters)
         {
             _logger.LogDebug("SongController.Get called with pageNumber {@pageNumber} and {@pageSize}", parameters.PageNumber, parameters.PageSize);                       
             
@@ -47,20 +67,27 @@ namespace Hymnstagram.Web.Controllers.Api
                 totalCount = songs.TotalCount,
                 pageSize = songs.PageSize,
                 currentPage = songs.CurrentPage,
-                totalPages = songs.TotalPages,
-                previousPageLink = songs.HasPrevious ? CreateSongResourceUri(parameters, ResourceUriType.PreviousPage) : null,
-                nextPageLink = songs.HasNext ? CreateSongResourceUri(parameters, ResourceUriType.NextPage) : null
+                totalPages = songs.TotalPages                
             };
 
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
-            var results = _mapper.Map<IEnumerable<SongResult>>(songs);
+            var songResults = _mapper.Map<IEnumerable<SongResult>>(songs);
+            var collectionResult = new SongCollectionResult() { Results = songResults, Links = CreateLinksForSongs(parameters, songs.HasNext, songs.HasPrevious) };
 
-            return Ok(results.Select(CreateLinksForSong));
+            return Ok(collectionResult);
         }
 
+        /// <summary>
+        /// Retrieves a single song and all child content
+        /// </summary>
+        /// <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
+        /// <param name="id">Guid-based identifier for the song</param>
+        /// <returns>Returns song object and related creators.</returns>
         [HttpGet("{id}", Name = "GetSong")]
-        public IActionResult GetById(Guid songbookId, Guid id)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]        
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<SongResult> GetById(Guid songbookId, Guid id)
         {
             _logger.LogDebug("SongController.GetById called on id {@id} (songbook: {@songbookId})", id, songbookId);
             var songbook = _repository.GetById(songbookId);
@@ -80,8 +107,17 @@ namespace Hymnstagram.Web.Controllers.Api
             return Ok(CreateLinksForSong(result));
         }
 
+        /// <summary>
+        /// Submits a new songbook to the system.
+        /// </summary>
+        /// <param name="songbookId">Guid-based identifier for the songbook the song will be applied to</param>
+        /// <param name="song">New song object</param>
+        /// <returns></returns>
         [HttpPost]
-        public IActionResult Post(Guid songbookId, [FromBody]SongCreate song)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public ActionResult<SongResult> Post(Guid songbookId, [FromBody]SongCreate song)
         {
             if(song == null)
             {
@@ -106,8 +142,16 @@ namespace Hymnstagram.Web.Controllers.Api
             return CreatedAtRoute("GetSong", new { songbookId = newSong.SongbookId, id = newSong.Id }, newSong);
         }
 
+        /// <summary>
+        /// Deletes a song from the system based on a specific songbook id and song id.
+        /// </summary>
+        /// <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
+        /// <param name="id">Guid-based identifier for the song</param>
+        /// <returns></returns>
         [HttpDelete("{id}", Name = "DeleteSong")]
-        public IActionResult Delete(Guid songbookId, Guid id)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]        
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult Delete(Guid songbookId, Guid id)
         {
             if (id == null || id == Guid.Empty)
             {
@@ -166,6 +210,26 @@ namespace Hymnstagram.Web.Controllers.Api
             song.Links.Add(new Link(Url.Link("DeleteSong", new { songbookId = song.SongbookId, id = song.Id }), "delete_song", "DELETE"));            
 
             return song;
+        }
+
+        private List<Link> CreateLinksForSongs(SongResourceParameters parameters, bool hasNext, bool hasPrevious)
+        {
+            var links = new List<Link>();
+
+            links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.Current), "self", "GET"));
+            links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.Current), "delete_song", "DELETE"));            
+
+            if(hasNext)
+            {
+                links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.NextPage), "next_page", "GET"));
+            }
+
+            if(hasPrevious)
+            {
+                links.Add(new Link(CreateSongResourceUri(parameters, ResourceUriType.PreviousPage), "previous_page", "GET"));
+            }
+
+            return links;
         }
     }
 }

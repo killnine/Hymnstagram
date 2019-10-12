@@ -1,0 +1,350 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Web</name>
+    </assembly>
+    <members>
+        <member name="T:Hymnstagram.Web.Controllers.Api.RootController">
+            <summary>
+            The Root controller is a default endpoint where users can get a summary
+            of the most common actions available on the API.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.RootController.#ctor(Microsoft.Extensions.Logging.ILogger{Hymnstagram.Web.Controllers.Api.RootController})">
+            <summary>
+            Root constructor.
+            </summary>
+            <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.RootController.GetRoot(System.String)">
+            <summary>
+            Returns the standard endpoints into the API
+            </summary>
+            <param name="mediaType">Use 'application/vnd.hymnstagram.hateoas+json' for HATEOAS media details.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Hymnstagram.Web.Controllers.Api.SongbookCollectionController">
+            <summary>
+            The SongbookCollection controller enables users to submit multiple songbooks into the system
+            via a single API call.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookCollectionController.#ctor(Microsoft.Extensions.Logging.ILogger{Hymnstagram.Web.Controllers.Api.SongbookCollectionController},AutoMapper.IMapper,Hymnstagram.Model.DataAccess.ISongbookRepository)">
+            <summary>
+            SongbookCollection constructor.
+            </summary>
+            <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+            <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
+            <param name="repository">Data access repository.</param>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookCollectionController.GetSongbookCollection(System.Collections.Generic.IEnumerable{System.Guid})">
+            <summary>
+            Retrieves a collection of songbooks, given a list of songbook ids.
+            </summary>        
+            <param name="ids">Comma-separated list of songbook guids, wrapped in parenthesis.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookCollectionController.Post(System.Collections.Generic.IEnumerable{Hymnstagram.Web.Models.Api.SongbookCreate})">
+            <summary>
+            Submit a list of songbooks to the API at once.
+            </summary>
+            <param name="songbookCollection">An array of Songbook creation objects.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Hymnstagram.Web.Controllers.Api.SongbookController">
+            <summary>
+            The Songbook controller enables users to create, read, and delete songbooks from the system. 
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.#ctor(Microsoft.Extensions.Logging.ILogger{Hymnstagram.Web.Controllers.Api.SongbookController},AutoMapper.IMapper,Hymnstagram.Model.DataAccess.ISongbookRepository,Hymnstagram.Web.Services.IPropertyMappingService)">
+            <summary>
+            Songbook constructor.
+            </summary>
+            <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+            <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
+            <param name="repository">Data access repository.</param>
+            <param name="propertyMappingService">The property-mapping service enables sorting by cross-referencing string field names to properties on the songbook objects</param>        
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.Get(Hymnstagram.Web.Helpers.Parameters.SongbookResourceParameters)">
+            <summary>
+            Retrieves a list of songbooks based on search, sorting, and filtering criteria.
+            </summary>
+            <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>        
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.Get(System.Guid)">
+            <summary>
+            Retrieves a single songbook and all child content
+            </summary>
+            <param name="id">Guid-based identifier for the songbook</param>        
+            <returns>Returns songbook object, related creators, and related songs.</returns>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.Post(Hymnstagram.Web.Models.Api.SongbookCreate)">
+            <summary>
+            Submits a new songbook to the system.
+            </summary>
+            <param name="songbook">Songbook object with all child references (Creators, Songs)</param>        
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongbookController.Delete(System.Guid)">
+            <summary>
+            Deletes a songbook from the system based on a specific songbook id.
+            </summary>
+            <param name="id">Guid-based songbook identifier.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Hymnstagram.Web.Controllers.Api.SongController">
+            <summary>
+            The Song controller enables users to create, read, and delete songs from a specific songbook.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.#ctor(Microsoft.Extensions.Logging.ILogger{Hymnstagram.Web.Controllers.Api.SongController},AutoMapper.IMapper,Hymnstagram.Model.DataAccess.ISongbookRepository)">
+            <summary>
+            Song constructor.
+            </summary>
+            <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+            <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
+            <param name="repository">Data access repository.</param>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.Get(Hymnstagram.Web.Helpers.Parameters.SongResourceParameters)">
+            <summary>
+            Retrieves a list of songs based on search, sorting, and filtering criteria.
+            </summary>
+            <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>     
+            <remarks>A song requires the SongbookId parameter be passed in.</remarks>        
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.GetById(System.Guid,System.Guid)">
+            <summary>
+            Retrieves a single song and all child content
+            </summary>
+            <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
+            <param name="id">Guid-based identifier for the song</param>
+            <returns>Returns song object and related creators.</returns>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.Post(System.Guid,Hymnstagram.Web.Models.Api.SongCreate)">
+            <summary>
+            Submits a new songbook to the system.
+            </summary>
+            <param name="songbookId">Guid-based identifier for the songbook the song will be applied to</param>
+            <param name="song">New song object</param>
+            <returns></returns>
+        </member>
+        <member name="M:Hymnstagram.Web.Controllers.Api.SongController.Delete(System.Guid,System.Guid)">
+            <summary>
+            Deletes a song from the system based on a specific songbook id and song id.
+            </summary>
+            <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
+            <param name="id">Guid-based identifier for the song</param>
+            <returns></returns>
+        </member>
+        <member name="T:Hymnstagram.Web.Helpers.ArrayModelBinder">
+            <summary>
+            ArrayModelBinder courtesy of Kevin Dockx' Pluralsight Course: https://app.pluralsight.com/library/courses/asp-dot-net-core-restful-api-building/
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Helpers.ArrayModelBinder.BindModelAsync(Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingContext)">
+            <summary>
+            Performs model binding of a comma-separate list to an array.
+            </summary>
+            <param name="bindingContext"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Hymnstagram.Web.Mapping.CreatorProfile">
+            <summary>
+            Automapper profile for converting Creator object types to their 
+            client-facing equivalents and back.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Mapping.CreatorProfile.#ctor">
+            <summary>
+            Profile constructor. 
+            Do your mapping here for Creator types.
+            </summary>
+        </member>
+        <member name="T:Hymnstagram.Web.Mapping.ParametersProfile">
+            <summary>
+            Automapper profile for converting Parameter object types to their 
+            client-facing equivalents and back.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Mapping.ParametersProfile.#ctor">
+            <summary>
+            Profile constructor. 
+            Do your mapping here for Parameter types.
+            </summary>
+        </member>
+        <member name="T:Hymnstagram.Web.Mapping.SongbookProfile">
+            <summary>
+            Automapper profile for converting Songbook object types to their 
+            client-facing equivalents and back.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Mapping.SongbookProfile.#ctor">
+            <summary>
+            Profile constructor. 
+            Do your mapping here for Songbook types.
+            </summary>
+        </member>
+        <member name="T:Hymnstagram.Web.Mapping.SongProfile">
+            <summary>
+            Automapper profile for converting Song object types to their 
+            client-facing equivalents and back.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Mapping.SongProfile.#ctor">
+            <summary>
+            Profile constructor. 
+            Do your mapping here for Song types.
+            </summary>
+        </member>
+        <member name="T:Hymnstagram.Web.Models.Api.CreatorCreate">
+            <summary>
+            Client-facing object for creating new Creators for Songs and Songbooks.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.CreatorCreate.FirstName">
+            <summary>
+            The first name of the creator.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.CreatorCreate.LastName">
+            <summary>
+            The surname of the creator.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.CreatorCreate.CreativeTypeId">
+            <summary>
+            The type of creator.
+            </summary>
+            <example>Editor, TechnicalEditor, AssociateEditor</example>
+        </member>
+        <member name="T:Hymnstagram.Web.Models.Api.Link">
+            <summary>
+            Link object used by Result classes for implementing HATEOAS
+            (Hypertext as the engine of application state) links to actions
+            on a resource.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.Link.Href">
+            <summary>
+            Url to action.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.Link.Rel">
+            <summary>
+            Description of action
+            </summary>
+            <remarks>Should be lower-case with words separated by underscores.</remarks>
+            <example>delete_song</example>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.Link.Method">
+            <summary>
+            HTTP verb of action
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Models.Api.Link.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Link constructor.
+            </summary>
+            <param name="href">Url to action.</param>
+            <param name="rel">Description of action</param>
+            <param name="method">HTTP verb of action</param>
+        </member>
+        <member name="T:Hymnstagram.Web.Models.Api.LinkedResourceBase">
+            <summary>
+            Base class for resources that implement HATEOAS linking
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.LinkedResourceBase.Links">
+            <summary>
+            Collection of HATEOAS links to various resource actions.
+            </summary>
+        </member>
+        <member name="T:Hymnstagram.Web.Models.Api.SongbookCreate">
+            <summary>
+            Client-facing object for creating new Songbooks.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.Title">
+            <summary>
+            The title of the songbook.
+            </summary>
+            <example>Psalms, Hymns, and Spiritual Songs</example>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.Publisher">
+            <summary>
+            The publishing body for the songbook.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.PublicationDate">
+            <summary>
+            The date which the songbook was most recently published.
+            </summary>
+            <remarks>Only the date component is referenced. Time is disregarded.</remarks>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.ISBN10">
+            <summary>
+            The 10-digit ISBN for the title.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.ISBN13">
+            <summary>
+            The 13-digit ISBN for the title.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.Creators">
+            <summary>
+            A list of various creator who helped create the songbook. 
+            Includes editor, technical editor, associate editor.
+            </summary>        
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.Songs">
+            <summary>
+            A list of songs encompassed within the songbook.
+            </summary>
+        </member>
+        <member name="T:Hymnstagram.Web.Models.Api.SongCreate">
+            <summary>
+            Client-facing object for creating new Songs for Songbooks.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongCreate.SongNumber">
+            <summary>
+            The song's position in the songbook.
+            </summary>
+            <example>127</example>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Tune">
+            <summary>
+            The tune to which the song is written.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Title">
+            <summary>
+            The name of the song.
+            </summary>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Key">
+            <summary>
+            The key in which the song is written
+            </summary>
+            <example>Bb</example>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongCreate.TimeSignature">
+            <summary>
+            The time signature in which the song is written
+            </summary>
+            <example>4/4</example>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongCreate.SolfaTypeId">
+            <summary>
+            The starting Solfege note relative to the key of the song
+            </summary>
+            <example>Mi</example>
+        </member>
+        <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Creators">
+            <summary>
+            A list of various creator who helped create the song. 
+            Includes composer, writer, and arranger type.
+            </summary>
+        </member>
+    </members>
+</doc>

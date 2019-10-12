@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Web</name>
+    </assembly>
+    <members>
+        <member name="M:Hymnstagram.Web.Controllers.Api.RootController.GetRoot(System.String)">
+            <summary>
+            Returns the standard endpoints into the API
+            </summary>
+            <param name="mediaType">Use 'application/vnd.hymnstagram.hateoas+json' for HATEOAS media details.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Hymnstagram.Web.Helpers.ArrayModelBinder">
+            <summary>
+            ArrayModelBinder courtesy of Kevin Dockx' Pluralsight Course: https://app.pluralsight.com/library/courses/asp-dot-net-core-restful-api-building/
+            </summary>
+        </member>
+    </members>
+</doc>

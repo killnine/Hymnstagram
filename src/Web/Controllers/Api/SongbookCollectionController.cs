@@ -8,11 +8,18 @@ using Hymnstagram.Model.DataTransfer;
 using Hymnstagram.Model.Domain;
 using Hymnstagram.Web.Helpers;
 using Hymnstagram.Web.Models.Api;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
+    /// <summary>
+    /// The SongbookCollection controller enables users to submit multiple songbooks into the system
+    /// via a single API call.
+    /// </summary>
+    [Produces("application/json")]
+    [Consumes("application/json")]
     [Route("api/songbookcollections")]
     public class SongbookCollectionController : Controller
     {
@@ -20,6 +27,12 @@ namespace Hymnstagram.Web.Controllers.Api
         private readonly IMapper _mapper;
         private readonly ISongbookRepository _repository;        
 
+        /// <summary>
+        /// SongbookCollection constructor.
+        /// </summary>
+        /// <param name="logger">Logging object (Microsoft.Extensions.Logging interface) for logging behavior and exceptions.</param>
+        /// <param name="mapper">Automapper object for converting domain objects to models and vice versa for communicating with the client.</param>
+        /// <param name="repository">Data access repository.</param>
         public SongbookCollectionController(ILogger<SongbookCollectionController> logger, IMapper mapper, ISongbookRepository repository)
         {
             _logger = logger;
@@ -27,8 +40,15 @@ namespace Hymnstagram.Web.Controllers.Api
             _repository = repository;            
         }
 
+        /// <summary>
+        /// Retrieves a collection of songbooks, given a list of songbook ids.
+        /// </summary>        
+        /// <param name="ids">Comma-separated list of songbook guids, wrapped in parenthesis.</param>
+        /// <returns></returns>
         [HttpGet("({ids})", Name = "GetSongbookCollection")]
-        public IActionResult GetSongbookCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<IEnumerable<SongbookResult>> GetSongbookCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
         {
             if(ids == null)
             {
@@ -47,8 +67,15 @@ namespace Hymnstagram.Web.Controllers.Api
             return Ok(songbooksToReturn.Select(CreateLinksForSongbook));
         }
 
-        [HttpPost]
-        public IActionResult Post([FromBody]IEnumerable<SongbookCreate> songbookCollection)
+        /// <summary>
+        /// Submit a list of songbooks to the API at once.
+        /// </summary>
+        /// <param name="songbookCollection">An array of Songbook creation objects.</param>
+        /// <returns></returns>
+        [HttpPost]        
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public ActionResult<IEnumerable<SongbookResult>> Post([FromBody]IEnumerable<SongbookCreate> songbookCollection)
         {
             if(songbookCollection == null)
             {
@@ -70,7 +97,7 @@ namespace Hymnstagram.Web.Controllers.Api
         private SongbookResult CreateLinksForSongbook(SongbookResult songbook)
         {
             songbook.Links.Add(new Link(Url.Link("GetSongbook", new { id = songbook.Id }), "self", "GET"));
-            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));            
+            songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));
 
             return songbook;
         }
