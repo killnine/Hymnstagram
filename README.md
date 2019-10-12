@@ -49,19 +49,29 @@ This means that Creators are more complex, with their own table separate from a 
 ## Patterns and Practices ##
 
 * API
-    * GET/POST/PUT/DELETE/PATCH
-    * RESTful API Implementation
+    * GET/POST/PUT/DELETE/PATCH    
     * HATEOAS
     * Pagination
-    * Content and Media Type Definitions
-    * (Unknown) Caching
+      * X-Pagination header    
+    * Validation
+      * FluentValidation
+      * DataAnnotations
+    * Caching
+      * ETags
+      * Cache Headers
+    * Documentation
+      * Swagger/Swashbuckle
+      * XML Comments and #pragma
+      * 'ProducesResponseType' for status codes
+      * 'Produces' for content type
+      * 'Consumes' for content type
+      * ActionResult<T>
+      
 * Data Access
     * Repository (Songbook as Aggregate Root)
     * Only allow queries on Indexed fields of database tables (Songbooks, Songs, Creators)
+    * Model project defines interface of DAOs. Separate project for implementation
+
 * General Development
     * Null-coalescing `ArgumentNullException` on constructor arguments (ex: `_logger = logger ?? throw new ArgumentNullException(nameof(logger))`)
     * Retrieval-levels on Repositories
-
-## Technical Considerations ##
-
-* Data access interfaces are defined in the model, but implemented in separate data access libraries specific to the data access technology being leveraged. (Dapper, Simple.Data, raw ADO, etc.)
