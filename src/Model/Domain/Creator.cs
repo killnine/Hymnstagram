@@ -1,10 +1,15 @@
-﻿using Hymnstagram.Model.DataTransfer;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Hymnstagram.Model.DataTransfer;
+using Hymnstagram.Model.Domain.Validators;
 using System;
 
 namespace Hymnstagram.Model.Domain
 {
     public class Creator : EntityBase
     {
+        private readonly AbstractValidator<Creator> _validator = new CreatorValidator();
+
         public Guid ParentId { get; set; }
         public CreatorParentType ParentType {get; set;}
         public string FirstName { get; set; }
@@ -51,6 +56,12 @@ namespace Hymnstagram.Model.Domain
                 ParentTypeId = (int)Type,                
                 TypeId = (int)ParentType                
             };
+        }
+
+        public bool IsValid => _validator.Validate(this).IsValid;
+        public ValidationResult Validate()
+        {
+            return _validator.Validate(this);
         }
     }
 }

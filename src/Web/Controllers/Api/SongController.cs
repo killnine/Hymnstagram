@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Hymnstagram.Model.DataAccess;
 using Hymnstagram.Model.DataTransfer;
 using Hymnstagram.Model.Domain;
@@ -19,6 +20,7 @@ namespace Hymnstagram.Web.Controllers.Api
     /// <summary>
     /// The Song controller enables users to create, read, and delete songs from a specific songbook.
     /// </summary>
+    [ApiController]
     [Produces("application/json")]
     [Consumes("application/json")]
     [Route("api/songbooks/{songbookId}/songs")]    
@@ -134,6 +136,14 @@ namespace Hymnstagram.Web.Controllers.Api
             
             var dto = _mapper.Map<SongDto>(song);
             var newSong = Song.From(dto);
+
+            //Perform validation
+            if (!newSong.IsValid)
+            {
+                newSong.Validate().AddToModelState(ModelState, null);
+                _logger.LogWarning("{method} failed model validation (ModelState: {@modelState}), returning Unprocessable Entity", nameof(Post), ModelState.Values.SelectMany(v => v.Errors));
+                return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(ModelState, HttpContext);                
+            }
 
             songbook.Songs.Add(newSong);
 

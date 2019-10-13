@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentValidation;
+using FluentValidation.Results;
 using Hymnstagram.Model.DataTransfer;
+using Hymnstagram.Model.Domain.Validators;
 
 namespace Hymnstagram.Model.Domain
 {
 
     public class Songbook : EntityBase
     {
+        private readonly AbstractValidator<Songbook> _validator = new SongbookValidator();
+
         public string Title { get; private set; }
         public string Publisher { get; private set; }
         public string ISBN10 { get; private set; }
@@ -58,6 +63,12 @@ namespace Hymnstagram.Model.Domain
                 Creators = Creators.Select(c => c.ToDto()).ToList(),
                 Songs = Songs.Select(s => s.ToDto()).ToList()
             };
+        }
+
+        public bool IsValid => _validator.Validate(this).IsValid;
+        public ValidationResult Validate()
+        {
+            return _validator.Validate(this);
         }
     }
 }

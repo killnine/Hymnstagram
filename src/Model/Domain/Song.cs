@@ -1,4 +1,7 @@
-﻿using Hymnstagram.Model.DataTransfer;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Hymnstagram.Model.DataTransfer;
+using Hymnstagram.Model.Domain.Validators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +10,8 @@ namespace Hymnstagram.Model.Domain
 {
     public class Song : EntityBase
     {
+        private readonly AbstractValidator<Song> _validator = new SongValidator();
+
         public Guid SongbookId { get; set; }
         public int? SongNumber { get; private set; }
         public string Tune { get; private set; }
@@ -63,6 +68,12 @@ namespace Hymnstagram.Model.Domain
                 SolfaTypeId = (int?)Solfa,
                 Creators = Creators.Select(c => c.ToDto()).ToList()
             };
+        }
+
+        public bool IsValid => _validator.Validate(this).IsValid;
+        public ValidationResult Validate()
+        {
+            return _validator.Validate(this);
         }
     }
 }
