@@ -42,6 +42,7 @@ This means that Creators are more complex, with their own table separate from a 
 * Dapper
 * Swagger          - Done
 * FluentValidation - Done
+* Marvin.Cache.Headers - Done
 * (Miniprofiler)[https://miniprofiler.com/dotnet/ConsoleDotNet]
 * SqlServer
 * (Experimental) IdentityServer
@@ -59,7 +60,7 @@ This means that Creators are more complex, with their own table separate from a 
       * X-Pagination header    
     * Validation (Domain)
       * FluentValidation      
-    * Caching
+    * Caching & Concurrency
       * ETags
       * Cache Headers
     * Documentation
@@ -76,5 +77,6 @@ This means that Creators are more complex, with their own table separate from a 
     * Model project defines interface of DAOs. Separate project for implementation
 
 * General Development
+    * Options pattern for application settings
     * Null-coalescing `ArgumentNullException` on constructor arguments (ex: `_logger = logger ?? throw new ArgumentNullException(nameof(logger))`)
     * Retrieval-levels on Repositories
