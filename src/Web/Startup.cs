@@ -33,7 +33,17 @@ namespace Hymnstogram.Web
         public IConfiguration Configuration { get; }
                 
         public void ConfigureServices(IServiceCollection services)
-        {
+        {            
+            services.AddHttpCacheHeaders((expirationModelOptions) =>
+            {                
+                expirationModelOptions.MaxAge = 600;
+                expirationModelOptions.CacheLocation = Marvin.Cache.Headers.CacheLocation.Private;
+            }, 
+            (validationModelOptions) =>
+            {
+                validationModelOptions.MustRevalidate = true;
+            });            
+
             services.AddControllers()                    
                     .ConfigureApiBehaviorOptions(setupAction =>
                     {                        
@@ -156,6 +166,8 @@ namespace Hymnstogram.Web
             });
 
             app.UseStaticFiles();
+          
+            app.UseHttpCacheHeaders();
 
             app.UseIpRateLimiting();
 

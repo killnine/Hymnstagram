@@ -51,9 +51,10 @@ namespace Hymnstagram.Web.Controllers.Api
         /// Retrieves a list of songbooks based on search, sorting, and filtering criteria.
         /// </summary>
         /// <param name="parameters">Parameters includes pagination settings, search criteria, sorting criteria, and filtering criteria.</param>        
-        [HttpGet(Name = "GetSongbooks")]
+        [HttpHead]
+        [HttpGet(Name = "GetSongbooks")]        
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]        
         public ActionResult<SongbookCollectionResult> Get(SongbookResourceParameters parameters)
         {
             _logger.LogDebug("SongbookController.Get called with pageNumber {@pageNumber} and {@pageSize}", parameters.PageNumber, parameters.PageSize);                      
