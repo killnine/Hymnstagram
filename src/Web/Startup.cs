@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using AutoMapper;
 using DataAccess.Memory.Daos;
 using FluentValidation.AspNetCore;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -22,7 +24,6 @@ namespace Hymnstogram.Web
 {
     #pragma warning disable CS1591 
     public class Startup
-
     {
         public Startup(IConfiguration configuration)
         {
@@ -65,6 +66,11 @@ namespace Hymnstogram.Web
 
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new SongbookProfile());
@@ -101,6 +107,21 @@ namespace Hymnstogram.Web
                 var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFile);
                 setupAction.IncludeXmlComments(xmlCommentsFullPath);
             });
+
+            services.AddMemoryCache();
+
+            services.Configure<IpRateLimitOptions>((options) =>
+            {
+                options.GeneralRules = new List<RateLimitRule>()
+                {
+                    new RateLimitRule()
+                    {
+                        Endpoint = "*",
+                        Limit = 50,
+                        Period = "5m"
+                    }
+                };                
+            });            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -135,6 +156,8 @@ namespace Hymnstogram.Web
             });
 
             app.UseStaticFiles();
+
+            app.UseIpRateLimiting();
 
             app.UseRouting();
 
