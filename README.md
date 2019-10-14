@@ -41,6 +41,7 @@ This means that Creators are more complex, with their own table separate from a 
 * StructureMap  
 * Dapper
 * Swagger          - Done
+* FluentValidation - Done
 * (Miniprofiler)[https://miniprofiler.com/dotnet/ConsoleDotNet]
 * SqlServer
 * (Experimental) IdentityServer
@@ -56,9 +57,8 @@ This means that Creators are more complex, with their own table separate from a 
     * HATEOAS
     * Pagination
       * X-Pagination header    
-    * Validation
-      * FluentValidation
-      * DataAnnotations
+    * Validation (Domain)
+      * FluentValidation      
     * Caching
       * ETags
       * Cache Headers

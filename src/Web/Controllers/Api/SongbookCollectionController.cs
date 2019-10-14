@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Hymnstagram.Model.DataAccess;
 using Hymnstagram.Model.DataAccess.Criteria;
 using Hymnstagram.Model.DataTransfer;
@@ -84,7 +85,22 @@ namespace Hymnstagram.Web.Controllers.Api
 
             _logger.LogDebug("SongbookCollectionController.Post called to add a new collection of songbooks {@songbookCollection}", songbookCollection);
             var songbooks = _mapper.Map<IEnumerable<SongbookDto>>(songbookCollection).Select(Songbook.From).ToList();
+
+            //Perform validation
             foreach(var songbook in songbooks)
+            {
+                if (!songbook.IsValid)
+                {
+                    songbook.Validate().AddToModelState(ModelState, $"({songbook.Title})");
+                    _logger.LogWarning("{method} failed model validation (ModelState: {@modelState}), returning Unprocessable Entity", nameof(Post), ModelState.Values.SelectMany(v => v.Errors));                    
+                }                
+            }
+            if (!ModelState.IsValid)
+            {
+                return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(ModelState, HttpContext);
+            }
+
+            foreach (var songbook in songbooks)
             {                
                 _repository.Save(songbook);
             }

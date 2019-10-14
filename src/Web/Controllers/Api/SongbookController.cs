@@ -15,6 +15,7 @@ using System.Linq;
 using Hymnstagram.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Hymnstagram.Web.Models.Api.Songbook;
+using FluentValidation.AspNetCore;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -119,7 +120,13 @@ namespace Hymnstagram.Web.Controllers.Api
             var dto = _mapper.Map<SongbookDto>(songbook);
             var newSongbook = Songbook.From(dto);
 
-            //TODO: Add validation
+            //Perform validation
+            if (!newSongbook.IsValid)
+            {
+                newSongbook.Validate().AddToModelState(ModelState, null);
+                _logger.LogWarning("{method} failed model validation (ModelState: {@modelState}), returning Unprocessable Entity", nameof(Post), ModelState.Values.SelectMany(v => v.Errors));
+                return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(ModelState, HttpContext);
+            }
 
             _repository.Save(newSongbook);
 

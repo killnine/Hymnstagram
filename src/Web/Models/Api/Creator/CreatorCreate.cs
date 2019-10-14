@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Hymnstagram.Web.Models.Api
+﻿namespace Hymnstagram.Web.Models.Api
 {
     /// <summary>
     /// Client-facing object for creating new Creators for Songs and Songbooks.
@@ -9,23 +7,18 @@ namespace Hymnstagram.Web.Models.Api
     {
         /// <summary>
         /// The first name of the creator.
-        /// </summary>
-        [Required]
-        [MaxLength(15)]
+        /// </summary>        
         public string FirstName { get; set; }
 
         /// <summary>
         /// The surname of the creator.
-        /// </summary>
-        [Required]
-        [MaxLength(25)]
+        /// </summary>               
         public string LastName { get; set; }
 
         /// <summary>
         /// The type of creator.
         /// </summary>
-        /// <example>Editor, TechnicalEditor, AssociateEditor</example>
-        [Required]
+        /// <example>Editor, TechnicalEditor, AssociateEditor</example>        
         public int CreativeTypeId { get; set; }
     }
 }

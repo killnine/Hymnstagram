@@ -147,6 +147,20 @@
             <param name="bindingContext"></param>
             <returns></returns>
         </member>
+        <member name="T:Hymnstagram.Web.Helpers.InvalidModelStateResponseFactory">
+            <summary>
+            Class to help generate response when client input fails validation.
+            </summary>
+        </member>
+        <member name="M:Hymnstagram.Web.Helpers.InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary,Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Generates an UnprocessableEntityObjectResult with standard field information for troubleshooting
+            invalid client input. 
+            </summary>
+            <param name="modelState">The ModelState (presumably invalid) of the current controller action</param>
+            <param name="context">HttpContext with information about the current request</param>
+            <returns>UnprocessableEntityObjectResult (422 Status Code)</returns>
+        </member>
         <member name="T:Hymnstagram.Web.Mapping.CreatorProfile">
             <summary>
             Automapper profile for converting Creator object types to their 
@@ -203,18 +217,18 @@
         <member name="P:Hymnstagram.Web.Models.Api.CreatorCreate.FirstName">
             <summary>
             The first name of the creator.
-            </summary>
+            </summary>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.CreatorCreate.LastName">
             <summary>
             The surname of the creator.
-            </summary>
+            </summary>               
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.CreatorCreate.CreativeTypeId">
             <summary>
             The type of creator.
             </summary>
-            <example>Editor, TechnicalEditor, AssociateEditor</example>
+            <example>Editor, TechnicalEditor, AssociateEditor</example>        
         </member>
         <member name="T:Hymnstagram.Web.Models.Api.Link">
             <summary>
@@ -267,28 +281,22 @@
             <summary>
             The title of the songbook.
             </summary>
-            <example>Psalms, Hymns, and Spiritual Songs</example>
+            <example>Psalms, Hymns, and Spiritual Songs</example>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.Publisher">
             <summary>
             The publishing body for the songbook.
-            </summary>
-        </member>
-        <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.PublicationDate">
-            <summary>
-            The date which the songbook was most recently published.
-            </summary>
-            <remarks>Only the date component is referenced. Time is disregarded.</remarks>
+            </summary>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.ISBN10">
             <summary>
             The 10-digit ISBN for the title.
-            </summary>
+            </summary>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.ISBN13">
             <summary>
             The 13-digit ISBN for the title.
-            </summary>
+            </summary>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongbookCreate.Creators">
             <summary>
@@ -310,35 +318,35 @@
             <summary>
             The song's position in the songbook.
             </summary>
-            <example>127</example>
+            <example>127</example>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Tune">
             <summary>
             The tune to which the song is written.
-            </summary>
+            </summary>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Title">
             <summary>
             The name of the song.
-            </summary>
+            </summary>                
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Key">
             <summary>
             The key in which the song is written
             </summary>
-            <example>Bb</example>
+            <example>Bb</example>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongCreate.TimeSignature">
             <summary>
             The time signature in which the song is written
             </summary>
-            <example>4/4</example>
+            <example>4/4</example>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongCreate.SolfaTypeId">
             <summary>
             The starting Solfege note relative to the key of the song
             </summary>
-            <example>Mi</example>
+            <example>Mi</example>        
         </member>
         <member name="P:Hymnstagram.Web.Models.Api.SongCreate.Creators">
             <summary>

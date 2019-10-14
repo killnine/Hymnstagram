@@ -1,7 +1,9 @@
 using AutoMapper;
 using DataAccess.Memory.Daos;
+using FluentValidation.AspNetCore;
 using Hymnstagram.Model.DataAccess;
 using Hymnstagram.Model.Services;
+using Hymnstagram.Web.Helpers;
 using Hymnstagram.Web.Mapping;
 using Hymnstagram.Web.Services;
 using Microsoft.AspNetCore.Builder;
@@ -36,21 +38,7 @@ namespace Hymnstogram.Web
                     {                        
                         setupAction.InvalidModelStateResponseFactory = context =>
                         {
-                            var problemDetails = new ValidationProblemDetails(context.ModelState)
-                            {
-                                Type = "https://courselibrary.com/modelvalidationproblem",
-                                Title = "One or more model validation errors occurred.",
-                                Status = StatusCodes.Status422UnprocessableEntity,
-                                Detail = "See the rrors property for details",
-                                Instance = context.HttpContext.Request.Path
-                            };
-
-                            problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
-
-                            return new UnprocessableEntityObjectResult(problemDetails)
-                            {
-                                ContentTypes = { "application/problem+json" }
-                            };
+                            return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(context.ModelState, context.HttpContext);
                         };
                     });
 
@@ -63,6 +51,9 @@ namespace Hymnstogram.Web
                 setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
                 setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
                 setupAction.Filters.Add(new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
+            }).AddFluentValidation(setupAction => 
+            {
+                setupAction.RunDefaultMvcValidationAfterFluentValidationExecutes = true;
             });
 
             services.AddSingleton<ISongDao,SongDao>();

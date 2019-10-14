@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Hymnstagram.Web.Models.Api
 {
@@ -11,41 +10,35 @@ namespace Hymnstagram.Web.Models.Api
         /// <summary>
         /// The song's position in the songbook.
         /// </summary>
-        /// <example>127</example>
-        [Required]
+        /// <example>127</example>        
         public int? SongNumber { get; set; }
 
         /// <summary>
         /// The tune to which the song is written.
-        /// </summary>
-        [MaxLength(60)]
+        /// </summary>        
         public string Tune { get; set; }
 
         /// <summary>
         /// The name of the song.
-        /// </summary>
-        [MaxLength(100)]
+        /// </summary>                
         public string Title { get; set; }
 
         /// <summary>
         /// The key in which the song is written
         /// </summary>
-        /// <example>Bb</example>
-        [MaxLength(5)]
+        /// <example>Bb</example>        
         public string Key { get; set; }
 
         /// <summary>
         /// The time signature in which the song is written
         /// </summary>
-        /// <example>4/4</example>
-        [MaxLength(5)]
+        /// <example>4/4</example>        
         public string TimeSignature { get; set; }
 
         /// <summary>
         /// The starting Solfege note relative to the key of the song
         /// </summary>
-        /// <example>Mi</example>
-        [MaxLength(3)]
+        /// <example>Mi</example>        
         public int? SolfaTypeId { get; set; }
 
         /// <summary>
