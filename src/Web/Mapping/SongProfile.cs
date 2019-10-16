@@ -2,6 +2,7 @@
 using Hymnstagram.Model.DataTransfer;
 using Hymnstagram.Model.Domain;
 using Hymnstagram.Web.Models.Api;
+using Hymnstagram.Web.Models.Api.Song;
 
 namespace Hymnstagram.Web.Mapping
 {
@@ -17,6 +18,7 @@ namespace Hymnstagram.Web.Mapping
         /// </summary>
         public SongProfile()
         {
+            CreateMap<SongPatch, SongDto>();
             CreateMap<SongCreate, SongDto>();
             CreateMap<Song, SongResult>();
         }

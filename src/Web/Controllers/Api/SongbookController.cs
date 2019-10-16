@@ -16,6 +16,10 @@ using Hymnstagram.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Hymnstagram.Web.Models.Api.Songbook;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -126,7 +130,7 @@ namespace Hymnstagram.Web.Controllers.Api
             {
                 newSongbook.Validate().AddToModelState(ModelState, null);
                 _logger.LogWarning("{method} failed model validation (ModelState: {@modelState}), returning Unprocessable Entity", nameof(Post), ModelState.Values.SelectMany(v => v.Errors));
-                return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(ModelState, HttpContext);
+                return ValidationProblem(ModelState);
             }
 
             _repository.Save(newSongbook);
@@ -215,6 +219,18 @@ namespace Hymnstagram.Web.Controllers.Api
             }            
 
             return links;
+        }
+
+        /// <summary>
+        /// Overrides default ValidationProblem behavior to allow us to use the ApiBehavior set up 
+        /// in Startup.cs
+        /// </summary>
+        /// <param name="modelStateDictionary">Current ModelState of the controller action</param>
+        /// <returns></returns>
+        public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices.GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }

@@ -11,7 +11,11 @@ using Hymnstagram.Web.Helpers;
 using Hymnstagram.Web.Models.Api;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -97,7 +101,7 @@ namespace Hymnstagram.Web.Controllers.Api
             }
             if (!ModelState.IsValid)
             {
-                return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(ModelState, HttpContext);
+                return ValidationProblem(ModelState);
             }
 
             foreach (var songbook in songbooks)
@@ -116,6 +120,18 @@ namespace Hymnstagram.Web.Controllers.Api
             songbook.Links.Add(new Link(Url.Link("DeleteSongbook", new { id = songbook.Id }), "delete_songbook", "DELETE"));
 
             return songbook;
+        }
+
+        /// <summary>
+        /// Overrides default ValidationProblem behavior to allow us to use the ApiBehavior set up 
+        /// in Startup.cs
+        /// </summary>
+        /// <param name="modelStateDictionary">Current ModelState of the controller action</param>
+        /// <returns></returns>
+        public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices.GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }

@@ -12,8 +12,13 @@ using Hymnstagram.Web.Helpers.Parameters;
 using Hymnstagram.Web.Models.Api;
 using Hymnstagram.Web.Models.Api.Song;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Hymnstagram.Web.Controllers.Api
 {
@@ -84,21 +89,21 @@ namespace Hymnstagram.Web.Controllers.Api
         /// Retrieves a single song and all child content
         /// </summary>
         /// <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
-        /// <param name="id">Guid-based identifier for the song</param>
+        /// <param name="songId">Guid-based identifier for the song</param>
         /// <returns>Returns song object and related creators.</returns>
-        [HttpGet("{id}", Name = "GetSong")]
+        [HttpGet("{songId}", Name = "GetSong")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]        
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<SongResult> GetById(Guid songbookId, Guid id)
+        public ActionResult<SongResult> GetById(Guid songbookId, Guid songId)
         {
-            _logger.LogDebug("SongController.GetById called on id {@id} (songbook: {@songbookId})", id, songbookId);
+            _logger.LogDebug("SongController.GetById called on id {@id} (songbook: {@songbookId})", songId, songbookId);
             var songbook = _repository.GetById(songbookId);
             if(songbook == null)
             {
                 return NotFound();
             }
 
-            var song = songbook.Songs.FirstOrDefault(s => s.Id == id);
+            var song = songbook.Songs.FirstOrDefault(s => s.Id == songId);
             if(song == null)
             {
                 return NotFound();
@@ -142,7 +147,7 @@ namespace Hymnstagram.Web.Controllers.Api
             {
                 newSong.Validate().AddToModelState(ModelState, null);
                 _logger.LogWarning("{method} failed model validation (ModelState: {@modelState}), returning Unprocessable Entity", nameof(Post), ModelState.Values.SelectMany(v => v.Errors));
-                return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(ModelState, HttpContext);                
+                return ValidationProblem(ModelState);
             }
 
             songbook.Songs.Add(newSong);
@@ -152,34 +157,73 @@ namespace Hymnstagram.Web.Controllers.Api
             return CreatedAtRoute("GetSong", new { songbookId = newSong.SongbookId, id = newSong.Id }, newSong);
         }
 
+        [HttpPatch("{songId}")]
+        public ActionResult Patch(Guid songbookId, Guid songId, JsonPatchDocument<SongPatch> patchDocument)
+        {
+            if(patchDocument == null)
+            {
+                return BadRequest();
+            }
+
+            _logger.LogDebug("SongController.Patch called to update song for songbook {@songbookId}: {@patchDocument}", songbookId, patchDocument);
+            var songbook = _repository.GetById(songbookId);
+            if (songbook == null)
+            {
+                _logger.LogWarning("Songbook.Patch failed to update song path {@patchDocument} to songbook {@songbookId}. Songbook was not found.", patchDocument, songbookId);
+                return NotFound();
+            }
+
+            var existingSong = songbook.Songs.FirstOrDefault(s => s.Id == songId);
+            if(existingSong == null)
+            {
+                _logger.LogWarning("Songbook.Patch failed to update song {@patchDocument} to songbook {@songbookId}. Song was not found in songbook.", patchDocument, songbookId);
+                return NotFound();
+            }
+
+            var songToPatch =_mapper.Map<SongPatch>(existingSong.ToDto());
+            patchDocument.ApplyTo(songToPatch, ModelState);
+
+            if(!TryValidateModel(songToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
+            
+            songbook.Songs.Remove(existingSong);
+            songbook.Songs.Add(Song.From(_mapper.Map<SongDto>(songToPatch)));
+
+            _repository.Save(songbook); 
+
+            return NoContent();            
+        }
+
         /// <summary>
         /// Deletes a song from the system based on a specific songbook id and song id.
         /// </summary>
         /// <param name="songbookId">Guid-based identifier for the songbook (song parent)</param>
-        /// <param name="id">Guid-based identifier for the song</param>
+        /// <param name="songId">Guid-based identifier for the song</param>
         /// <returns></returns>
-        [HttpDelete("{id}", Name = "DeleteSong")]
+        [HttpDelete("{songId}", Name = "DeleteSong")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]        
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult Delete(Guid songbookId, Guid id)
+        public ActionResult Delete(Guid songbookId, Guid songId)
         {
-            if (id == null || id == Guid.Empty)
+            if (songId == null || songId == Guid.Empty)
             {
                 return BadRequest();
             };
 
-            _logger.LogDebug("SongController.Delete called to remove song {@id} from songbook {@songbookId}", id, songbookId);
+            _logger.LogDebug("SongController.Delete called to remove song {@id} from songbook {@songbookId}", songId, songbookId);
             var songbook = _repository.GetById(songbookId);
             if (songbook == null)
             {
-                _logger.LogWarning("SongController.Delete failed to remove song {@id} because songbook {@songbookId} was not found.", id, songbookId);
+                _logger.LogWarning("SongController.Delete failed to remove song {@id} because songbook {@songbookId} was not found.", songId, songbookId);
                 return NotFound();
             }
 
-            var song = songbook.Songs.FirstOrDefault(s => s.Id == id);
+            var song = songbook.Songs.FirstOrDefault(s => s.Id == songId);
             if(song == null)
             {
-                _logger.LogWarning("Song {@id} was not removed because it was not found on songbook {@songbookId}.", id, songbookId);
+                _logger.LogWarning("Song {@id} was not removed because it was not found on songbook {@songbookId}.", songId, songbookId);
                 return NotFound();
             }
 
@@ -240,6 +284,18 @@ namespace Hymnstagram.Web.Controllers.Api
             }
 
             return links;
+        }
+
+        /// <summary>
+        /// Overrides default ValidationProblem behavior to allow us to use the ApiBehavior set up 
+        /// in Startup.cs
+        /// </summary>
+        /// <param name="modelStateDictionary">Current ModelState of the controller action</param>
+        /// <returns></returns>
+        public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices.GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }

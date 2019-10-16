@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,12 +45,30 @@ namespace Hymnstogram.Web
                 validationModelOptions.MustRevalidate = true;
             });            
 
-            services.AddControllers()                    
+            services.AddControllers()   
+                    .AddNewtonsoftJson(setupAction =>
+                    {
+                        setupAction.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    })
                     .ConfigureApiBehaviorOptions(setupAction =>
                     {                        
                         setupAction.InvalidModelStateResponseFactory = context =>
                         {
-                            return InvalidModelStateResponseFactory.GenerateResponseForInvalidModelState(context.ModelState, context.HttpContext);
+                            var problemDetails = new ValidationProblemDetails(context.ModelState)
+                            {
+                                Type = "https://hymnstagram.com/api/modelvalidationproblem",
+                                Title = "One or more model validation errors occurred.",
+                                Status = StatusCodes.Status422UnprocessableEntity,
+                                Detail = "See the errors property for details",
+                                Instance = context.HttpContext.Request.Path
+                            };
+
+                            problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+                            return new UnprocessableEntityObjectResult(problemDetails)
+                            {
+                                ContentTypes = { "application/problem+json" }
+                            };
                         };
                     });
 
